@@ -1,0 +1,23 @@
+package com.eyesmoons.lineage.event.domain.repository;
+
+import com.eyesmoons.lineage.event.domain.model.TableNode;
+import org.springframework.data.neo4j.annotation.Query;
+import org.springframework.data.neo4j.repository.Neo4jRepository;
+import org.springframework.stereotype.Repository;
+
+/**
+ * 字段关系
+ */
+@Repository
+public interface TableRepository extends Neo4jRepository<TableNode, String> {
+
+    /**
+     * FIELD_FROM_TABLE Merge: if not exists create,otherwise,update it
+     */
+    @Query("MATCH (field:FIELD),(table:TABLE) " +
+            "WHERE field.dataSourceName = table.dataSourceName " +
+            "AND field.dbName = table.dbName " +
+            "AND field.tableName = table.tableName " +
+            "MERGE (field)-[:field_from_table]->(table)")
+    void mergeRelWithField();
+}
