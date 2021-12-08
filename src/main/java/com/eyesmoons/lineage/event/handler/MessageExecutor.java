@@ -32,6 +32,10 @@ public class MessageExecutor {
             Objects.requireNonNull(messageHandler, "messageHandler required");
             // 获取消息上下文
             LineageContext lineageContext = messageHandler.handle(record);
+            log.info("关系节点：{}", lineageContext.getProcessNodeList());
+            log.info("数据库节点：{}", lineageContext.getDbNodeList());
+            log.info("表血缘：{}", lineageContext.getTableNodeList());
+            log.info("字段血缘：{}", lineageContext.getFieldNodeList());
             Objects.requireNonNull(lineageContext, "lineageContext required");
             // 消息存储
             mergeStorageHandler.handle(lineageContext);
