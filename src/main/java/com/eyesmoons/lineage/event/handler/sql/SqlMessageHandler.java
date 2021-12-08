@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -84,7 +85,10 @@ public class SqlMessageHandler implements BaseMessageHandler {
             List<ParseColumnNode> leafParseColumnNodeList = TreeNodeUtil.searchTreeLeafNodeList(columnNodeTreeNode);
             // convert
             FieldNode targetFieldNode = buildFieldNodeNeo4j(request, target);
-            List<FieldNode> sourceFieldNodeList = leafParseColumnNodeList.stream().map(fieldNode -> this.buildFieldNodeNeo4j(request, fieldNode)).collect(Collectors.toList());
+            List<FieldNode> sourceFieldNodeList = leafParseColumnNodeList.stream()
+                    .filter(parseColumnNode -> Objects.nonNull(parseColumnNode.getOwner()))
+                    .map(fieldNode -> this.buildFieldNodeNeo4j(request, fieldNode))
+                    .collect(Collectors.toList());
             // save
             context.getFieldNodeList().add(targetFieldNode);
             context.getFieldNodeList().addAll(sourceFieldNodeList);

@@ -37,7 +37,6 @@ public class MessageExecutor {
             mergeStorageHandler.handle(lineageContext);
         } catch (Exception e) {
             log.error("SQL解析异常：{}", e.getMessage());
-            e.printStackTrace();
         } finally {
             // 手动提交 offset
             acknowledgment.acknowledge();

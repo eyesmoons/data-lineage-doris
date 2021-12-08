@@ -4,8 +4,8 @@ import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlSchemaStatVisitor;
 import com.eyesmoons.lineage.parser.exception.ParserException;
-import com.eyesmoons.lineage.parser.model.ColumnNode;
-import com.eyesmoons.lineage.parser.model.TableNode;
+import com.eyesmoons.lineage.parser.model.ParseColumnNode;
+import com.eyesmoons.lineage.parser.model.ParseTableNode;
 import com.eyesmoons.lineage.parser.model.TreeNode;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -23,7 +23,7 @@ public class DefaultColumnLineageTracer implements ColumnLineageTracer {
      * Long tableId 节点ID
      * List<TreeNode<TableNode>>> 某一节点最近的节点
      */
-    private final Map<Long, List<TreeNode<TableNode>>> recentTreeNodeMap = new HashMap<>();
+    private final Map<Long, List<TreeNode<ParseTableNode>>> recentTreeNodeMap = new HashMap<>();
 
     /**
      * 构建字段来源的字段血缘
@@ -32,18 +32,17 @@ public class DefaultColumnLineageTracer implements ColumnLineageTracer {
      * @param tableNode         表节点
      */
     @Override
-    public void traceColumnLineageTree(String dbType, TreeNode<ColumnNode> currentColumnNode, TreeNode<TableNode> tableNode) {
+    public void traceColumnLineageTree(String dbType, TreeNode<ParseColumnNode> currentColumnNode, TreeNode<ParseTableNode> tableNode) {
         // 当前字段向下检索列的来源, 后面需定位当前列所在的节点
-        ColumnNode currentColumn = currentColumnNode.getValue();
+        ParseColumnNode currentColumn = currentColumnNode.getValue();
         // 根据AST构造关系，这里来源表最多一层，所以判断来源是否有值，如果有值，那么以来源字段构建检索
         if (CollectionUtils.isNotEmpty(currentColumn.getSourceColumns())) {
             // 来源字段
-            List<ColumnNode> sourceColumnList = currentColumn.getSourceColumns();
+            List<ParseColumnNode> sourceColumnList = currentColumn.getSourceColumns();
             // 遍历存入能够直接取到的字段
             sourceColumnList.forEach(column -> {
-                TreeNode<ColumnNode> middleColumnNode = new TreeNode<>();
+                TreeNode<ParseColumnNode> middleColumnNode = new TreeNode<>();
                 currentColumnNode.addChild(middleColumnNode);
-                log.info("column:[{}]", column);
                 middleColumnNode.setValue(column);
                 // 依旧以当前的表节点去向下检索来源字段
                 this.traceColumnLineageTree(dbType, middleColumnNode, tableNode);
@@ -52,7 +51,7 @@ public class DefaultColumnLineageTracer implements ColumnLineageTracer {
             return;
         }
         // 字段肯定来源于下一级的节点去寻找, 构建离当前节点最近的别名节点
-        List<TreeNode<TableNode>> nearestTableNodeList = this.nearestTableNodes(tableNode);
+        List<TreeNode<ParseTableNode>> nearestTableNodeList = this.nearestTableNodes(tableNode);
         // 当前字段的定位表名
         String scanTableName = currentColumnNode.getValue().getTableName();
         // 字段名称为空修复
@@ -60,8 +59,8 @@ public class DefaultColumnLineageTracer implements ColumnLineageTracer {
             scanTableName = this.repairMissingTableName(currentColumnNode.getValue(), dbType);
         }
         // 先遍历来源的表节点列表
-        for (TreeNode<TableNode> currentRecentlyTableNode : nearestTableNodeList) {
-            TableNode lineageTable = currentRecentlyTableNode.getValue();
+        for (TreeNode<ParseTableNode> currentRecentlyTableNode : nearestTableNodeList) {
+            ParseTableNode lineageTable = currentRecentlyTableNode.getValue();
             //  如果是叶子节点，直接返回表名作为别名
             String alias = Optional.ofNullable(lineageTable.getAlias()).orElse(lineageTable.getName());
             if (!alias.equals(scanTableName)) {
@@ -69,8 +68,8 @@ public class DefaultColumnLineageTracer implements ColumnLineageTracer {
                 continue;
             }
             if (currentRecentlyTableNode.isLeaf()) {
-                TreeNode<ColumnNode> endColumnNode = new TreeNode<>();
-                endColumnNode.setValue(ColumnNode.builder()
+                TreeNode<ParseColumnNode> endColumnNode = new TreeNode<>();
+                endColumnNode.setValue(ParseColumnNode.builder()
                         .name(currentColumnNode.getValue().getName())
                         .tableName(scanTableName)
                         .owner(lineageTable)
@@ -82,16 +81,15 @@ public class DefaultColumnLineageTracer implements ColumnLineageTracer {
                 // 1. 终止
             }
             // 定位的列名 先取列名，列名去不了取别名
-            String scanColumnName = Optional.ofNullable(currentColumnNode.getValue().getName())
-                    .orElse(currentColumnNode.getValue().getAlias());
+            String scanColumnName = Optional.ofNullable(currentColumnNode.getValue().getName()).orElse(currentColumnNode.getValue().getAlias());
             // 获取当前中间节点的字段名
-            List<ColumnNode> columns = currentRecentlyTableNode.getValue().getColumns();
+            List<ParseColumnNode> columns = currentRecentlyTableNode.getValue().getColumns();
             // 设置节点所有表为当前
-            for (ColumnNode column : columns) {
+            for (ParseColumnNode column : columns) {
                 String name = Optional.ofNullable(column.getAlias()).orElse(column.getName());
                 // 如果相等 构建关系
                 if (scanColumnName.equals(name)) {
-                    TreeNode<ColumnNode> midColumnTree = new TreeNode<>();
+                    TreeNode<ParseColumnNode> midColumnTree = new TreeNode<>();
                     currentColumnNode.addChild(midColumnTree);
                     midColumnTree.setValue(column);
                     // 继续向下遍历
@@ -104,13 +102,12 @@ public class DefaultColumnLineageTracer implements ColumnLineageTracer {
         this.possibleColumnSource(currentColumnNode, nearestTableNodeList);
     }
 
-    private void possibleColumnSource(TreeNode<ColumnNode> currentColumnNode, List<TreeNode<TableNode>> nearestTableNodeList) {
-        if (!CollectionUtils.isEmpty(nearestTableNodeList) && nearestTableNodeList.size() == 1
-                && nearestTableNodeList.get(0).isLeaf()) {
+    private void possibleColumnSource(TreeNode<ParseColumnNode> currentColumnNode, List<TreeNode<ParseTableNode>> nearestTableNodeList) {
+        if (!CollectionUtils.isEmpty(nearestTableNodeList) && nearestTableNodeList.size() == 1 && nearestTableNodeList.get(0).isLeaf()) {
             // 2. 终止
-            TreeNode<ColumnNode> endColumnNode = new TreeNode<>();
+            TreeNode<ParseColumnNode> endColumnNode = new TreeNode<>();
             currentColumnNode.addChild(endColumnNode);
-            endColumnNode.setValue(ColumnNode.builder()
+            endColumnNode.setValue(ParseColumnNode.builder()
                             // 最后是取真实字段名
                             .name(currentColumnNode.getValue().getName())
                             .tableName(nearestTableNodeList.get(0).getValue().getName())
@@ -129,7 +126,7 @@ public class DefaultColumnLineageTracer implements ColumnLineageTracer {
      * @return nearestTableNodeList List<TreeNode<TableNode>>
      */
     @SuppressWarnings("unsed")
-    private boolean validNode(TreeNode<TableNode> node) {
+    private boolean validNode(TreeNode<ParseTableNode> node) {
         return node.getValue().getAlias() != null || node.getValue().getIsVirtualTemp() == null;
     }
 
@@ -139,12 +136,12 @@ public class DefaultColumnLineageTracer implements ColumnLineageTracer {
      * @param currentNode 当前的🌲 节点
      * @return List<TreeNode < TableNode>>
      */
-    private List<TreeNode<TableNode>> nearestTableNodes(TreeNode<TableNode> currentNode) {
-        List<TreeNode<TableNode>> hitTreeNodeList = recentTreeNodeMap.get(currentNode.getId().get());
+    private List<TreeNode<ParseTableNode>> nearestTableNodes(TreeNode<ParseTableNode> currentNode) {
+        List<TreeNode<ParseTableNode>> hitTreeNodeList = recentTreeNodeMap.get(currentNode.getId().get());
         if (CollectionUtils.isNotEmpty(hitTreeNodeList)) {
             return hitTreeNodeList;
         }
-        List<TreeNode<TableNode>> nearestTableNodeList = new ArrayList<>();
+        List<TreeNode<ParseTableNode>> nearestTableNodeList = new ArrayList<>();
         this.nearestTableNodes(currentNode, nearestTableNodeList);
         // 放入缓存
         recentTreeNodeMap.put(currentNode.getId().get(), nearestTableNodeList);
@@ -157,7 +154,7 @@ public class DefaultColumnLineageTracer implements ColumnLineageTracer {
      * @param currentNode          当前节点
      * @param nearestTableNodeList 存储当前的最近节点
      */
-    private void nearestTableNodes(TreeNode<TableNode> currentNode, List<TreeNode<TableNode>> nearestTableNodeList) {
+    private void nearestTableNodes(TreeNode<ParseTableNode> currentNode, List<TreeNode<ParseTableNode>> nearestTableNodeList) {
         // 找完所有的节点都没有找到，那么从查询的中断节点里面去寻找，如果别名为空 找下一个节点，如果匹配到别名就停止并返回
         if (currentNode.isLeaf()) {
             nearestTableNodeList.add(currentNode);
@@ -183,18 +180,19 @@ public class DefaultColumnLineageTracer implements ColumnLineageTracer {
      * 2. select distinct a1,b1 from table1,table2 X
      * 第一种情况识别可以，第二种会取第一个表的字段，建议在SQL书写时，指定出对应别名
      *
-     * @param columnNode columnNode
+     * @param parseColumnNode columnNode
      * @param dbType     dbType
      * @return 表名
      */
-    private String repairMissingTableName(ColumnNode columnNode, String dbType) {
-        if (StringUtils.isEmpty(columnNode.getTableExpression())) {
-            log.info("字段节点：[{}]", columnNode);
-            throw new ParserException("repair missing table, table expression can't null.");
+    private String repairMissingTableName(ParseColumnNode parseColumnNode, String dbType) {
+        if (StringUtils.isEmpty(parseColumnNode.getTableExpression())) {
+            log.info("字段节点：[{}]", parseColumnNode);
+            // throw new ParserException("repair missing table, table expression can't null.");
+            return null;
         }
-        SQLStatement stmt = SQLUtils.parseSingleStatement(columnNode.getTableExpression(), dbType);
+        SQLStatement stmt = SQLUtils.parseSingleStatement(parseColumnNode.getTableExpression(), dbType);
         MySqlSchemaStatVisitor mysqlSchemaStatVisitor = new MySqlSchemaStatVisitor();
         stmt.accept(mysqlSchemaStatVisitor);
-        return mysqlSchemaStatVisitor.getTables().keySet().stream().findFirst().orElseThrow(() -> new ParserException("repair missing table failed,column expression[%s].", columnNode.getExpression())).getName();
+        return mysqlSchemaStatVisitor.getTables().keySet().stream().findFirst().orElseThrow(() -> new ParserException("repair missing table failed,column expression[%s].", parseColumnNode.getExpression())).getName();
     }
 }
