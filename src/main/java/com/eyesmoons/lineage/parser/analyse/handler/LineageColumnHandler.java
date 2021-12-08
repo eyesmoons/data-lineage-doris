@@ -4,8 +4,8 @@ import com.alibaba.druid.sql.parser.ParserException;
 import com.eyesmoons.lineage.parser.analyse.SqlRequestContext;
 import com.eyesmoons.lineage.parser.analyse.SqlResponseContext;
 import com.eyesmoons.lineage.parser.constant.PriorityConstants;
-import com.eyesmoons.lineage.parser.model.ColumnNode;
-import com.eyesmoons.lineage.parser.model.TableNode;
+import com.eyesmoons.lineage.parser.model.ParseColumnNode;
+import com.eyesmoons.lineage.parser.model.ParseTableNode;
 import com.eyesmoons.lineage.parser.model.TreeNode;
 import com.eyesmoons.lineage.parser.tracer.ColumnLineageTracer;
 import com.eyesmoons.lineage.parser.tracer.ColumnLineageTracerFactory;
@@ -29,15 +29,15 @@ public class LineageColumnHandler implements IHandler {
     }
 
     private void handleColumnRelation(SqlRequestContext sqlContext, SqlResponseContext response) {
-        TreeNode<TableNode> lineageTableTree = response.getLineageTableTree();
-        TreeNode<TableNode> firstHaveColumnTableNode = this.findFirstHaveColumnTableNode(lineageTableTree);
-        List<ColumnNode> rootColumns = firstHaveColumnTableNode.getValue().getColumns();
+        TreeNode<ParseTableNode> lineageTableTree = response.getLineageTableTree();
+        TreeNode<ParseTableNode> firstHaveColumnTableNode = this.findFirstHaveColumnTableNode(lineageTableTree);
+        List<ParseColumnNode> rootColumns = firstHaveColumnTableNode.getValue().getColumns();
         if (CollectionUtils.isEmpty(rootColumns)) {
             throw new ParserException("node not found effective");
         }
         ColumnLineageTracer columnLineageTracer = ColumnLineageTracerFactory.getDefaultTracer();
         // 获取到字段血缘树
-        List<TreeNode<ColumnNode>> lineageColumnTreeList = new ArrayList<>();
+        List<TreeNode<ParseColumnNode>> lineageColumnTreeList = new ArrayList<>();
         rootColumns.stream().map(TreeNode::of).forEach(nodeTreeNode -> {
             lineageColumnTreeList.add(nodeTreeNode);
             columnLineageTracer.traceColumnLineageTree(sqlContext.getDbType(), nodeTreeNode, firstHaveColumnTableNode);
@@ -52,7 +52,7 @@ public class LineageColumnHandler implements IHandler {
      * @param root TableNode
      * @return TreeNode<TableNode>
      */
-    private TreeNode<TableNode> findFirstHaveColumnTableNode(TreeNode<TableNode> root) {
+    private TreeNode<ParseTableNode> findFirstHaveColumnTableNode(TreeNode<ParseTableNode> root) {
         if (!CollectionUtils.isEmpty(root.getValue().getColumns())) {
             return root;
         }

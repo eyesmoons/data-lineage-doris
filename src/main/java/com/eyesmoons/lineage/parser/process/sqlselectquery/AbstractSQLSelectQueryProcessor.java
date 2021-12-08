@@ -5,7 +5,7 @@ import com.alibaba.druid.sql.ast.statement.SQLCreateTableStatement;
 import com.alibaba.druid.sql.ast.statement.SQLSelectQuery;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
 import com.alibaba.druid.sql.ast.statement.SQLSubqueryTableSource;
-import com.eyesmoons.lineage.parser.model.TableNode;
+import com.eyesmoons.lineage.parser.model.ParseTableNode;
 import com.eyesmoons.lineage.parser.model.TreeNode;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public abstract class AbstractSQLSelectQueryProcessor implements SQLSelectQueryProcessor {
 
     @Override
-    public void process(String dbType, AtomicInteger sequence, TreeNode<TableNode> parent, SQLSelectQuery sqlSelectQuery) {}
+    public void process(String dbType, AtomicInteger sequence, TreeNode<ParseTableNode> parent, SQLSelectQuery sqlSelectQuery) {}
 
     protected String getSubQueryTableSourceAlias(SQLObject sqlObject) {
         SQLObject parentObject = sqlObject.getParent().getParent();

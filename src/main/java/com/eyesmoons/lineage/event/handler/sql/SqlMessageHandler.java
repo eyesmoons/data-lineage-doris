@@ -14,7 +14,8 @@ import com.eyesmoons.lineage.event.util.SqlKafkaUtil;
 import com.eyesmoons.lineage.parser.analyse.SqlRequestContext;
 import com.eyesmoons.lineage.parser.analyse.SqlResponseContext;
 import com.eyesmoons.lineage.parser.analyse.handler.DefaultHandlerChain;
-import com.eyesmoons.lineage.parser.model.ColumnNode;
+import com.eyesmoons.lineage.parser.model.ParseColumnNode;
+import com.eyesmoons.lineage.parser.model.ParseTableNode;
 import com.eyesmoons.lineage.parser.model.TreeNode;
 import com.eyesmoons.lineage.parser.util.TreeNodeUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -74,16 +75,16 @@ public class SqlMessageHandler implements BaseMessageHandler {
 
     private void handleFieldNode(SqlRequestContext request, SqlResponseContext response, LineageContext context) {
         // 获取字段关系树
-        List<TreeNode<ColumnNode>> lineageColumnTreeList = response.getLineageColumnTreeList();
+        List<TreeNode<ParseColumnNode>> lineageColumnTreeList = response.getLineageColumnTreeList();
         if (CollectionUtils.isEmpty(lineageColumnTreeList)) {
             return;
         }
         lineageColumnTreeList.forEach(columnNodeTreeNode -> {
-            ColumnNode target = columnNodeTreeNode.getValue();
-            List<ColumnNode> leafColumnNodeList = TreeNodeUtil.searchTreeLeafNodeList(columnNodeTreeNode);
+            ParseColumnNode target = columnNodeTreeNode.getValue();
+            List<ParseColumnNode> leafParseColumnNodeList = TreeNodeUtil.searchTreeLeafNodeList(columnNodeTreeNode);
             // convert
             FieldNode targetFieldNode = buildFieldNodeNeo4j(request, target);
-            List<FieldNode> sourceFieldNodeList = leafColumnNodeList.stream().map(fieldNode -> this.buildFieldNodeNeo4j(request, fieldNode)).collect(Collectors.toList());
+            List<FieldNode> sourceFieldNodeList = leafParseColumnNodeList.stream().map(fieldNode -> this.buildFieldNodeNeo4j(request, fieldNode)).collect(Collectors.toList());
             // save
             context.getFieldNodeList().add(targetFieldNode);
             context.getFieldNodeList().addAll(sourceFieldNodeList);
@@ -103,12 +104,12 @@ public class SqlMessageHandler implements BaseMessageHandler {
 
     private void handleTableNode(SqlRequestContext request, SqlResponseContext response, LineageContext context) {
         // 获取表关系树
-        TreeNode<com.eyesmoons.lineage.parser.model.TableNode> lineageTableTree = response.getLineageTableTree();
-        List<com.eyesmoons.lineage.parser.model.TableNode> leafTableNodeList = TreeNodeUtil.searchTreeLeafNodeList(lineageTableTree);
-        com.eyesmoons.lineage.parser.model.TableNode rootTableNode = lineageTableTree.getRoot().getValue();
+        TreeNode<ParseTableNode> lineageTableTree = response.getLineageTableTree();
+        List<ParseTableNode> leafParseTableNodeList = TreeNodeUtil.searchTreeLeafNodeList(lineageTableTree);
+        ParseTableNode rootParseTableNode = lineageTableTree.getRoot().getValue();
         // convert
-        TableNode targetTableNode = buildTableNodeNeo4j(request, rootTableNode);
-        List<TableNode> sourceTableNodeList = leafTableNodeList.stream().map(tableNode -> this.buildTableNodeNeo4j(request, tableNode)).collect(Collectors.toList());
+        TableNode targetTableNode = buildTableNodeNeo4j(request, rootParseTableNode);
+        List<TableNode> sourceTableNodeList = leafParseTableNodeList.stream().map(tableNode -> this.buildTableNodeNeo4j(request, tableNode)).collect(Collectors.toList());
         context.getTableNodeList().add(targetTableNode);
         context.getTableNodeList().addAll(sourceTableNodeList);
         List<String> sourceNodePkList = sourceTableNodeList.stream().map(BaseNodeEntity::getPk).distinct().collect(Collectors.toList());
@@ -123,14 +124,14 @@ public class SqlMessageHandler implements BaseMessageHandler {
         context.getProcessNodeList().add(processNode);
     }
 
-    private FieldNode buildFieldNodeNeo4j(SqlRequestContext context, ColumnNode parserColumnNode) {
-        com.eyesmoons.lineage.parser.model.TableNode tableNode = Optional.ofNullable(parserColumnNode.getOwner()).orElseThrow(() -> new CommonException("column table node is null"));
-        String dbName = tableNode.getDbName();
-        return new FieldNode(context.getDataSourceName(), dbName, tableNode.getName(), parserColumnNode.getName());
+    private FieldNode buildFieldNodeNeo4j(SqlRequestContext context, ParseColumnNode parserParseColumnNode) {
+        ParseTableNode parseTableNode = Optional.ofNullable(parserParseColumnNode.getOwner()).orElseThrow(() -> new CommonException("column table node is null"));
+        String dbName = parseTableNode.getDbName();
+        return new FieldNode(context.getDataSourceName(), dbName, parseTableNode.getName(), parserParseColumnNode.getName());
     }
 
-    private TableNode buildTableNodeNeo4j(SqlRequestContext context, com.eyesmoons.lineage.parser.model.TableNode parserTableNode) {
-        String dbName = parserTableNode.getDbName();
-        return new TableNode(context.getDataSourceName(), dbName, parserTableNode.getName());
+    private TableNode buildTableNodeNeo4j(SqlRequestContext context, ParseTableNode parserParseTableNode) {
+        String dbName = parserParseTableNode.getDbName();
+        return new TableNode(context.getDataSourceName(), dbName, parserParseTableNode.getName());
     }
 }

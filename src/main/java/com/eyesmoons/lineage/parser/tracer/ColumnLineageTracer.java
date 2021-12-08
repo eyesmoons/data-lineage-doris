@@ -1,7 +1,7 @@
 package com.eyesmoons.lineage.parser.tracer;
 
-import com.eyesmoons.lineage.parser.model.ColumnNode;
-import com.eyesmoons.lineage.parser.model.TableNode;
+import com.eyesmoons.lineage.parser.model.ParseColumnNode;
+import com.eyesmoons.lineage.parser.model.ParseTableNode;
 import com.eyesmoons.lineage.parser.model.TreeNode;
 
 /**
@@ -15,5 +15,5 @@ public interface ColumnLineageTracer {
      * @param currentColumnNode 当前的Column
      * @param tableNode         表血缘树
      */
-    void traceColumnLineageTree(String dbType, TreeNode<ColumnNode> currentColumnNode, TreeNode<TableNode> tableNode);
+    void traceColumnLineageTree(String dbType, TreeNode<ParseColumnNode> currentColumnNode, TreeNode<ParseTableNode> tableNode);
 }

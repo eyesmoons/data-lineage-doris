@@ -23,8 +23,7 @@ public class TreeNode<T> {
 
     int subtreeSize;
 
-    public TreeNode() {
-    }
+    public TreeNode() {}
 
     TreeNode(T value) {
         this.value = value;
@@ -99,5 +98,3 @@ public class TreeNode<T> {
     }
 
 }
-
-

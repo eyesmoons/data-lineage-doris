@@ -7,9 +7,10 @@ import com.eyesmoons.lineage.parser.analyse.SqlRequestContext;
 import com.eyesmoons.lineage.parser.analyse.SqlResponseContext;
 import com.eyesmoons.lineage.parser.analyse.handler.IHandler;
 import com.eyesmoons.lineage.parser.constant.PriorityConstants;
-import com.eyesmoons.lineage.parser.model.ColumnNode;
-import com.eyesmoons.lineage.parser.model.TableNode;
+import com.eyesmoons.lineage.parser.model.ParseColumnNode;
+import com.eyesmoons.lineage.parser.model.ParseTableNode;
 import com.eyesmoons.lineage.parser.model.TreeNode;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -24,34 +25,35 @@ import java.util.stream.Collectors;
  */
 @Order(PriorityConstants.LITTLE_HIGH + 1)
 @Component
+@Slf4j
 public class FirstTableSupplementHandler implements IHandler {
 
-    private static final String hostUrl = "10.220.146.10:6033";
+    private static final String hostUrl = "172.22.224.101:6033";
 
-    private static final String db = "demo";
+    private static final String db = "tms";
 
-    private static final String user = "root";
+    private static final String user = "shengyu";
 
-    private static final String password = "";
+    private static final String password = "j1sYxLGcEDhu";
 
     @Override
     public void handleRequest(SqlRequestContext request, SqlResponseContext response) {
         if (whetherHandle(response)) {
-            TreeNode<TableNode> root = response.getLineageTableTree();
-            TableNode tableNode = root.getValue();
-            String targetTableName = tableNode.getName();
-            String targetTableDb = tableNode.getDbName();
+            TreeNode<ParseTableNode> root = response.getLineageTableTree();
+            ParseTableNode parseTableNode = root.getValue();
+            String targetTableName = parseTableNode.getName();
+            String targetTableDb = parseTableNode.getDbName();
             List<JSONObject> resultColumns = DorisJdbcUtil.executeQuery(hostUrl, db, user, password, "desc " + targetTableDb + "." + targetTableName);
-            List<ColumnNode> columnNodeList = resultColumns.stream().map(this::convert2ColumnNode).collect(Collectors.toList());
-            List<ColumnNode> childColumnList = this.findFirstHaveColumnTableNode(root).getValue().getColumns();
-            if (columnNodeList.size() != childColumnList.size()) {
-                throw new CommonException("解析SQL错误，来源表字段和目标表字段数量不一致，来源表：" + childColumnList.size() + "目标表：" + columnNodeList.size());
+            List<ParseColumnNode> parseColumnNodeList = resultColumns.stream().map(this::convert2ColumnNode).collect(Collectors.toList());
+            List<ParseColumnNode> childColumnList = this.findFirstHaveColumnTableNode(root).getValue().getColumns();
+            if (parseColumnNodeList.size() != childColumnList.size()) {
+                throw new CommonException("解析SQL错误，来源表字段和目标表字段数量不一致，来源表：" + childColumnList.size() + "目标表：" + parseColumnNodeList.size());
             }
             for (int i = 0; i < childColumnList.size(); i++) {
-                columnNodeList.get(i).setOwner(tableNode);
-                columnNodeList.get(i).getSourceColumns().add(childColumnList.get(i));
+                parseColumnNodeList.get(i).setOwner(parseTableNode);
+                parseColumnNodeList.get(i).getSourceColumns().add(childColumnList.get(i));
             }
-            tableNode.getColumns().addAll(columnNodeList);
+            parseTableNode.getColumns().addAll(parseColumnNodeList);
         }
     }
 
@@ -59,10 +61,10 @@ public class FirstTableSupplementHandler implements IHandler {
         return CollectionUtils.isEmpty(response.getLineageTableTree().getValue().getColumns());
     }
 
-    private ColumnNode convert2ColumnNode(JSONObject jsonObject) {
-        ColumnNode columnNode = new ColumnNode();
-        columnNode.setName(jsonObject.getString("Field"));
-        return columnNode;
+    private ParseColumnNode convert2ColumnNode(JSONObject jsonObject) {
+        ParseColumnNode parseColumnNode = new ParseColumnNode();
+        parseColumnNode.setName(jsonObject.getString("Field"));
+        return parseColumnNode;
     }
 
     /**
@@ -71,7 +73,7 @@ public class FirstTableSupplementHandler implements IHandler {
      * @param root TableNode
      * @return TreeNode<TableNode>
      */
-    private TreeNode<TableNode> findFirstHaveColumnTableNode(TreeNode<TableNode> root) {
+    private TreeNode<ParseTableNode> findFirstHaveColumnTableNode(TreeNode<ParseTableNode> root) {
         if (!org.springframework.util.CollectionUtils.isEmpty(root.getValue().getColumns())) {
             return root;
         }

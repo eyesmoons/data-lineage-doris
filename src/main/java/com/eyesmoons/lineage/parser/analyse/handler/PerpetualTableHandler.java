@@ -6,7 +6,7 @@ import com.alibaba.druid.sql.parser.ParserException;
 import com.eyesmoons.lineage.parser.analyse.SqlRequestContext;
 import com.eyesmoons.lineage.parser.analyse.SqlResponseContext;
 import com.eyesmoons.lineage.parser.constant.PriorityConstants;
-import com.eyesmoons.lineage.parser.model.TableNode;
+import com.eyesmoons.lineage.parser.model.ParseTableNode;
 import com.eyesmoons.lineage.parser.model.TreeNode;
 import com.eyesmoons.lineage.parser.process.ProcessorRegister;
 import org.springframework.core.annotation.Order;
@@ -31,7 +31,7 @@ public class PerpetualTableHandler implements IHandler {
 
     public void handleTableRelation(SqlRequestContext sqlContext, SqlResponseContext response) {
         AtomicInteger sequence = new AtomicInteger();
-        TreeNode<TableNode> root = new TreeNode<>();
+        TreeNode<ParseTableNode> root = new TreeNode<>();
         SQLStatement statement;
         try {
             statement = SQLUtils.parseSingleStatement(sqlContext.getSql(), sqlContext.getDbType().toLowerCase());

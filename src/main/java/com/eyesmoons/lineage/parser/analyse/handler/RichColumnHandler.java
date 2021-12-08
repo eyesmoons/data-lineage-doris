@@ -3,7 +3,7 @@ package com.eyesmoons.lineage.parser.analyse.handler;
 import com.eyesmoons.lineage.parser.analyse.SqlRequestContext;
 import com.eyesmoons.lineage.parser.analyse.SqlResponseContext;
 import com.eyesmoons.lineage.parser.constant.PriorityConstants;
-import com.eyesmoons.lineage.parser.model.TableNode;
+import com.eyesmoons.lineage.parser.model.ParseTableNode;
 import com.eyesmoons.lineage.parser.model.TreeNode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
@@ -26,7 +26,7 @@ public class RichColumnHandler implements IHandler {
      * Tree<Table> 填充Column的TableExpression 字段
      * @param root 当前表关系树节点
      */
-    public void fillingTableExpression(TreeNode<TableNode> root) {
+    public void fillingTableExpression(TreeNode<ParseTableNode> root) {
         root.getValue().getColumns().forEach(columnNode -> columnNode.setTableExpression(root.getValue().getExpression()));
         if (root.isLeaf()) {
             return;

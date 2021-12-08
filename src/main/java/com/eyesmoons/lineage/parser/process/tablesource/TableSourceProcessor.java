@@ -1,7 +1,7 @@
 package com.eyesmoons.lineage.parser.process.tablesource;
 
 import com.alibaba.druid.sql.ast.statement.SQLTableSource;
-import com.eyesmoons.lineage.parser.model.TableNode;
+import com.eyesmoons.lineage.parser.model.ParseTableNode;
 import com.eyesmoons.lineage.parser.model.TreeNode;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -18,5 +18,5 @@ public interface TableSourceProcessor {
      * @param parent         父节点
      * @param sqlTableSource SQLTableSource 子类
      */
-    void process(String dbType, AtomicInteger sequence, TreeNode<TableNode> parent, SQLTableSource sqlTableSource);
+    void process(String dbType, AtomicInteger sequence, TreeNode<ParseTableNode> parent, SQLTableSource sqlTableSource);
 }
