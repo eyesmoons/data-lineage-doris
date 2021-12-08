@@ -17,6 +17,7 @@ import com.eyesmoons.lineage.parser.analyse.handler.DefaultHandlerChain;
 import com.eyesmoons.lineage.parser.model.ColumnNode;
 import com.eyesmoons.lineage.parser.model.TreeNode;
 import com.eyesmoons.lineage.parser.util.TreeNodeUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,7 @@ import java.util.stream.Collectors;
  * SQL 解析
  */
 @SourceHandler(NeoConstant.SourceType.SQL)
+@Slf4j
 public class SqlMessageHandler implements BaseMessageHandler {
 
     @Autowired
@@ -113,7 +115,6 @@ public class SqlMessageHandler implements BaseMessageHandler {
         // 表关系节点
         ProcessNode processNode = new ProcessNode(NeoConstant.ProcessType.TABLE_PROCESS, sourceNodePkList, targetTableNode.getPk());
         processNode.setType(HandlerConstant.SOURCE_TYPE_SQL_PARSER);
-        // 补充信息
         // 填充 dataSourceName
         LineageUtil.fillingProcessNode(targetTableNode, processNode);
         // 执行的SQL
@@ -123,7 +124,7 @@ public class SqlMessageHandler implements BaseMessageHandler {
     }
 
     private FieldNode buildFieldNodeNeo4j(SqlRequestContext context, ColumnNode parserColumnNode) {
-        com.eyesmoons.lineage.parser.model.TableNode tableNode = Optional.ofNullable(parserColumnNode.getOwner()).orElseThrow(() -> new CommonException("column.table.node.null"));
+        com.eyesmoons.lineage.parser.model.TableNode tableNode = Optional.ofNullable(parserColumnNode.getOwner()).orElseThrow(() -> new CommonException("column table node is null"));
         String dbName = tableNode.getDbName();
         return new FieldNode(context.getDataSourceName(), dbName, tableNode.getName(), parserColumnNode.getName());
     }

@@ -43,6 +43,7 @@ public class DefaultColumnLineageTracer implements ColumnLineageTracer {
             sourceColumnList.forEach(column -> {
                 TreeNode<ColumnNode> middleColumnNode = new TreeNode<>();
                 currentColumnNode.addChild(middleColumnNode);
+                log.info("column:[{}]", column);
                 middleColumnNode.setValue(column);
                 // 依旧以当前的表节点去向下检索来源字段
                 this.traceColumnLineageTree(dbType, middleColumnNode, tableNode);
@@ -63,7 +64,7 @@ public class DefaultColumnLineageTracer implements ColumnLineageTracer {
             TableNode lineageTable = currentRecentlyTableNode.getValue();
             //  如果是叶子节点，直接返回表名作为别名
             String alias = Optional.ofNullable(lineageTable.getAlias()).orElse(lineageTable.getName());
-            if (!scanTableName.equals(alias)) {
+            if (!alias.equals(scanTableName)) {
                 // 下一次循环
                 continue;
             }
@@ -188,6 +189,7 @@ public class DefaultColumnLineageTracer implements ColumnLineageTracer {
      */
     private String repairMissingTableName(ColumnNode columnNode, String dbType) {
         if (StringUtils.isEmpty(columnNode.getTableExpression())) {
+            log.info("字段节点：[{}]", columnNode);
             throw new ParserException("repair missing table, table expression can't null.");
         }
         SQLStatement stmt = SQLUtils.parseSingleStatement(columnNode.getTableExpression(), dbType);
