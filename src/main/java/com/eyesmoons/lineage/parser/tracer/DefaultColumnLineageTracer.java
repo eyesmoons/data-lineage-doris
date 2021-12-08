@@ -115,7 +115,7 @@ public class DefaultColumnLineageTracer implements ColumnLineageTracer {
                             .build());
         } else {
             // 兜底：记录找不到的信息
-            log.warn("columnNodeTree:{} not ended", currentColumnNode.getId());
+            log.warn("columnNodeTree:{} not ended", currentColumnNode.getValue().getTableName() + "." + currentColumnNode.getValue().getName());
         }
     }
 
@@ -186,7 +186,6 @@ public class DefaultColumnLineageTracer implements ColumnLineageTracer {
      */
     private String repairMissingTableName(ParseColumnNode parseColumnNode, String dbType) {
         if (StringUtils.isEmpty(parseColumnNode.getTableExpression())) {
-            log.info("字段节点：[{}]", parseColumnNode);
             // throw new ParserException("repair missing table, table expression can't null.");
             return null;
         }
