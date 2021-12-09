@@ -43,7 +43,6 @@ public class RelationshipServiceImpl implements RelationshipService {
             return;
         }
 
-        // （'pk1','pk2','pk3'）
         String cql = String.format( MERGE_RELATION_INPUTS, starts.stream().collect(Collectors.joining(DELIMITER, StringPool.SINGLE_QUOTE, StringPool.SINGLE_QUOTE)), end);
         log.debug("execute cql is [{}]", cql);
         Session session = sessionFactory.openSession();
