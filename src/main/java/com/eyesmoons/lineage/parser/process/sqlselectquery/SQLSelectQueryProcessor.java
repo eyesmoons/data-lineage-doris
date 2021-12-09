@@ -1,8 +1,8 @@
 package com.eyesmoons.lineage.parser.process.sqlselectquery;
 
 import com.alibaba.druid.sql.ast.statement.SQLSelectQuery;
-import com.eyesmoons.lineage.parser.model.ParseTableNode;
-import com.eyesmoons.lineage.parser.model.TreeNode;
+import com.eyesmoons.lineage.model.parser.ParseTableNode;
+import com.eyesmoons.lineage.model.parser.TreeNode;
 
 import java.util.concurrent.atomic.AtomicInteger;
 

@@ -4,9 +4,9 @@ import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.SQLCreateViewStatement;
 import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLSelectQuery;
-import com.eyesmoons.lineage.parser.anotation.SQLObjectType;
-import com.eyesmoons.lineage.parser.model.ParseTableNode;
-import com.eyesmoons.lineage.parser.model.TreeNode;
+import com.eyesmoons.lineage.annotation.SQLObjectType;
+import com.eyesmoons.lineage.model.parser.ParseTableNode;
+import com.eyesmoons.lineage.model.parser.TreeNode;
 import com.eyesmoons.lineage.parser.process.ProcessorRegister;
 
 import java.util.concurrent.atomic.AtomicInteger;

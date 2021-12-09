@@ -1,8 +1,8 @@
 package com.eyesmoons.lineage.parser.analyse;
 
-import com.eyesmoons.lineage.parser.model.ParseColumnNode;
-import com.eyesmoons.lineage.parser.model.ParseTableNode;
-import com.eyesmoons.lineage.parser.model.TreeNode;
+import com.eyesmoons.lineage.model.parser.ParseColumnNode;
+import com.eyesmoons.lineage.model.parser.ParseTableNode;
+import com.eyesmoons.lineage.model.parser.TreeNode;
 import lombok.Data;
 
 import java.util.List;

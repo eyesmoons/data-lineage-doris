@@ -5,10 +5,10 @@ import com.alibaba.druid.sql.ast.statement.SQLSelectQuery;
 import com.alibaba.druid.sql.ast.statement.SQLTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLUnionQueryTableSource;
 import com.alibaba.druid.sql.parser.ParserException;
-import com.eyesmoons.lineage.parser.anotation.SQLObjectType;
-import com.eyesmoons.lineage.parser.model.ParseColumnNode;
-import com.eyesmoons.lineage.parser.model.ParseTableNode;
-import com.eyesmoons.lineage.parser.model.TreeNode;
+import com.eyesmoons.lineage.annotation.SQLObjectType;
+import com.eyesmoons.lineage.model.parser.ParseColumnNode;
+import com.eyesmoons.lineage.model.parser.ParseTableNode;
+import com.eyesmoons.lineage.model.parser.TreeNode;
 import com.eyesmoons.lineage.parser.process.ProcessorRegister;
 import org.springframework.util.StringUtils;
 

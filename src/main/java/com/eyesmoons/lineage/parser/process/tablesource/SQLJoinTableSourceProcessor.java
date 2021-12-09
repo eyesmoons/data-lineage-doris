@@ -3,10 +3,10 @@ package com.eyesmoons.lineage.parser.process.tablesource;
 import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.statement.SQLJoinTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLTableSource;
-import com.eyesmoons.lineage.parser.anotation.SQLObjectType;
-import com.eyesmoons.lineage.parser.contants.ParserConstant;
-import com.eyesmoons.lineage.parser.model.ParseTableNode;
-import com.eyesmoons.lineage.parser.model.TreeNode;
+import com.eyesmoons.lineage.annotation.SQLObjectType;
+import com.eyesmoons.lineage.contants.ParserConstant;
+import com.eyesmoons.lineage.model.parser.ParseTableNode;
+import com.eyesmoons.lineage.model.parser.TreeNode;
 import com.eyesmoons.lineage.parser.process.ProcessorRegister;
 
 import java.util.concurrent.atomic.AtomicInteger;
