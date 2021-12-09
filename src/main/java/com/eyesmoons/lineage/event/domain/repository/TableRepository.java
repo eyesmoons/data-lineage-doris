@@ -12,9 +12,9 @@ import org.springframework.stereotype.Repository;
 public interface TableRepository extends Neo4jRepository<TableNode, String> {
 
     /**
-     * FIELD_FROM_TABLE Merge: if not exists create,otherwise,update it
+     * field_from_table Merge: if not exists create,otherwise,update it
      */
-    @Query("MATCH (field:FIELD),(table:TABLE) " +
+    @Query("MATCH (field:Field),(table:Table) " +
             "WHERE field.dataSourceName = table.dataSourceName " +
             "AND field.dbName = table.dbName " +
             "AND field.tableName = table.tableName " +

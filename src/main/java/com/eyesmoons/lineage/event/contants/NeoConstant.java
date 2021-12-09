@@ -16,18 +16,18 @@ public class NeoConstant {
     public static class Type {
         private Type() {}
 
-        public static final String NODE_DATASOURCE = "DATASOURCE";
-        public static final String NODE_DB = "DB";
-        public static final String NODE_TABLE = "TABLE";
-        public static final String NODE_FIELD = "FIELD";
-        public static final String NODE_RELATION = "RELATION";
+        public static final String NODE_DATASOURCE = "Datasource";
+        public static final String NODE_DB = "Db";
+        public static final String NODE_TABLE = "Table";
+        public static final String NODE_FIELD = "Field";
+        public static final String NODE_RELATION = "Relation";
     }
 
     public static class RelationType {
         private RelationType() {}
 
-        public static final String TABLE_RELATION = "TABLE_RELATION";
-        public static final String FIELD_RELATION = "FIELD_RELATION";
+        public static final String TABLE_RELATION = "table";
+        public static final String FIELD_RELATION = "field";
     }
 
     public static class SourceType {

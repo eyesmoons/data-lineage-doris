@@ -13,9 +13,9 @@ import org.springframework.stereotype.Repository;
 public interface DataSourceRepository extends Neo4jRepository<DataSourceNode, String> {
 
     /**
-     * DB_FROM_DATASOURCE Merge: if not exists create,otherwise,update it
+     * db_from_datasource Merge: if not exists create,otherwise,update it
      */
-    @Query("MATCH (c:DATASOURCE),(s:DB) " +
+    @Query("MATCH (c:Datasource),(s:Db) " +
             "WHERE c.dataSourceName = s.dataSourceName  " +
             "MERGE (s)-[r:db_from_datasource]->(c)")
     void mergeRelWithDb();

@@ -59,7 +59,7 @@ public class MergeStorageHandler implements BaseStorageHandler {
             return;
         }
         relationNodeList.forEach(relationNode -> {
-            // table | fields -> (relation_in) -> relation
+            // table | fields -> (relation_input) -> relation
             relationshipService.mergeRelRelationInputs(relationNode.getSourceNodePkList(), relationNode.getPk());
             relationRepository.mergeRelRelationOutput(relationNode.getPk(), relationNode.getTargetNodePk());
         });

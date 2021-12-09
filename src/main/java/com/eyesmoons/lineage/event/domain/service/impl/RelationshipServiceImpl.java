@@ -1,6 +1,5 @@
 package com.eyesmoons.lineage.event.domain.service.impl;
 
-import com.eyesmoons.lineage.common.exception.CommonException;
 import com.eyesmoons.lineage.common.util.StringPool;
 import com.eyesmoons.lineage.event.domain.service.RelationshipService;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +17,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * relation_in  table|field -> (relation_in) -> relation
+ * relation_input  table|field -> (relation_input) -> relation
  * 以多对一的方式合并去建立关系
  */
 @Service
@@ -33,9 +32,9 @@ public class RelationshipServiceImpl implements RelationshipService {
     /**
      * s -> (n:1) e
      */
-    private static final String MERGE_RELATION_INPUTS = "MATCH (s),(e:RELATION) WHERE " +
+    private static final String MERGE_RELATION_INPUTS = "MATCH (s),(e:Relation) WHERE " +
             "s.pk in [%s] and e.pk = '%s'  "
-            + "MERGE (s)-[r:relation_in]->(e) set r.timestamp=timestamp() "
+            + "MERGE (s)-[r:relation_input]->(e) set r.timestamp=timestamp() "
             + "RETURN id(r) as relId";
 
     @Override

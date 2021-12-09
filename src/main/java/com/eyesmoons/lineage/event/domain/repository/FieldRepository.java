@@ -12,7 +12,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface FieldRepository extends Neo4jRepository<FieldNode, String> {
 
-    @Query("MATCH (f:FIELD),(p:RELATION) " +
+    @Query("MATCH (f:Field),(p:Relation) " +
             "WHERE f.pk = $sourceFieldNodePk " +
             "and p.pk= $relationNodePk " +
             "MERGE (f)-[r:relation_input]->(p)")

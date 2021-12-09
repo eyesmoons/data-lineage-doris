@@ -12,9 +12,9 @@ import org.springframework.stereotype.Repository;
 public interface DbRepository extends Neo4jRepository<DbNode, String> {
 
     /**
-     * TABLE_FROM_DB Merge: if not exists create,otherwise,update it
+     * table_from_db Merge: if not exists create,otherwise,update it
      */
-    @Query("MATCH (s:DB),(table:TABLE) " +
+    @Query("MATCH (s:Db),(table:Table) " +
             "WHERE table.dataSourceName = s.dataSourceName " +
             "AND table.dbName = s.dbName " +
             "MERGE (table)-[r:table_from_db]->(s)")

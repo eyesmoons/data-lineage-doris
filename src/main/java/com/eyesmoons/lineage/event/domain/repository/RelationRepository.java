@@ -19,7 +19,7 @@ public interface RelationRepository extends Neo4jRepository<RelationNode, String
      * @param relationPk relationPk
      * @param tablePk   tablePk
      */
-    @Query("MATCH (t),(p:RELATION) " +
+    @Query("MATCH (t),(p:Relation) " +
             "WHERE t.dataSourceName = p.dataSourceName  " +
             "AND t.pk = $tablePk  " +
             "AND p.pk = $relationPk  " +
