@@ -11,7 +11,7 @@ import java.util.Optional;
 
 /**
  * 主要是处理多个节点之间的关系
- * Process节点主键及pk字段生成规则如下：
+ * Relation节点主键及pk字段生成规则如下：
  * 示例：
  * sourceNodePkList：x,y
  * targetNodePk: z
@@ -22,16 +22,16 @@ import java.util.Optional;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-@NodeEntity(NeoConstant.Type.NODE_PROCESS)
-public class ProcessNode extends BaseNodeEntity {
+@NodeEntity(NeoConstant.Type.NODE_RELATION)
+public class RelationNode extends BaseNodeEntity {
 
     /**
      * 关系类型
-     * default: 表关系  TABLE_PROCESS - TABLE
-     * 字段关系 FIELD_PROCESS - FIELD
+     * 表关系  table_relation - table
+     * 字段关系 field_relation - field
      */
     @Builder.Default
-    private String processType = NeoConstant.ProcessType.TABLE_PROCESS;
+    private String relationType = NeoConstant.RelationType.TABLE_RELATION;
     /**
      * 来源类型 sqoop|sql
      */
@@ -50,10 +50,10 @@ public class ProcessNode extends BaseNodeEntity {
     @Transient
     private String targetNodePk;
 
-    public ProcessNode(String processType, List<String> sourceNodePkList, String targetNodePk) {
-        Optional.ofNullable(processType).ifPresent(this::setProcessType);
+    public RelationNode(String relationType, List<String> sourceNodePkList, String targetNodePk) {
+        Optional.ofNullable(relationType).ifPresent(this::setRelationType);
         this.setSourceNodePkList(sourceNodePkList);
         this.setTargetNodePk(targetNodePk);
-        this.setPk(LineageUtil.genProcessNodePk(this));
+        this.setPk(LineageUtil.genRelationNodePk(this));
     }
 }

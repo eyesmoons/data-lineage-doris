@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * PROCESS_IN  TABLE|FIELD -> (PROCESS_IN) -> Process
+ * relation_in  table|field -> (relation_in) -> relation
  * 以多对一的方式合并去建立关系
  */
 @Service
@@ -33,19 +33,19 @@ public class RelationshipServiceImpl implements RelationshipService {
     /**
      * s -> (n:1) e
      */
-    private static final String MERGE_PROCESS_INPUTS = "MATCH (s),(e:PROCESS) WHERE " +
+    private static final String MERGE_RELATION_INPUTS = "MATCH (s),(e:RELATION) WHERE " +
             "s.pk in [%s] and e.pk = '%s'  "
-            + "MERGE (s)-[r:process_in]->(e) set r.timestamp=timestamp() "
+            + "MERGE (s)-[r:relation_in]->(e) set r.timestamp=timestamp() "
             + "RETURN id(r) as relId";
 
     @Override
-    public void mergeRelProcessInputs(List<String> starts, String end) {
+    public void mergeRelRelationInputs(List<String> starts, String end) {
         if (CollectionUtils.isEmpty(starts)) {
             return;
         }
 
         // （'pk1','pk2','pk3'）
-        String cql = String.format( MERGE_PROCESS_INPUTS, starts.stream().collect(Collectors.joining(DELIMITER, StringPool.SINGLE_QUOTE, StringPool.SINGLE_QUOTE)), end);
+        String cql = String.format( MERGE_RELATION_INPUTS, starts.stream().collect(Collectors.joining(DELIMITER, StringPool.SINGLE_QUOTE, StringPool.SINGLE_QUOTE)), end);
         log.debug("execute cql is [{}]", cql);
         Session session = sessionFactory.openSession();
         Result result = session.query(cql, Collections.emptyMap());
@@ -53,8 +53,7 @@ public class RelationshipServiceImpl implements RelationshipService {
         result.forEach(resultMapList::add);
         if (resultMapList.size() != starts.size()) {
             log.error("execute recode num [{}] != success num [{}]. maybe neo4j question. current cql is [{}]", starts.size(), resultMapList.size(), cql);
-            // record
-            throw new CommonException("execute recode num [%s] != success num [%s]. maybe neo4j question", starts.size(), resultMapList.size());
+            // throw new CommonException("execute recode num [%s] != success num [%s]. maybe neo4j question", starts.size(), resultMapList.size());
         }
     }
 }

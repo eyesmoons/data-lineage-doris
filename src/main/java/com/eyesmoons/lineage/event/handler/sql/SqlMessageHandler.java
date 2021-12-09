@@ -26,7 +26,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -95,14 +94,14 @@ public class SqlMessageHandler implements BaseMessageHandler {
             // 处理字段关系
             List<String> filedSourceNodePkList = sourceFieldNodeList.stream().map(BaseNodeEntity::getPk).distinct().collect(Collectors.toList());
             // 字段关系节点
-            ProcessNode fieldProcessNode = new ProcessNode(NeoConstant.ProcessType.FIELD_PROCESS, filedSourceNodePkList, targetFieldNode.getPk());
-            fieldProcessNode.setType(HandlerConstant.SOURCE_TYPE_SQL_PARSER);
+            RelationNode fieldRelationNode = new RelationNode(NeoConstant.RelationType.FIELD_RELATION, filedSourceNodePkList, targetFieldNode.getPk());
+            fieldRelationNode.setType(HandlerConstant.SOURCE_TYPE_SQL_PARSER);
             // 填充 dataSourceName
-            LineageUtil.fillingProcessNode(targetFieldNode, fieldProcessNode);
+            LineageUtil.fillingRelationNode(targetFieldNode, fieldRelationNode);
             // 执行的SQL
-            fieldProcessNode.getExtra().put("sql", request.getSql());
+            fieldRelationNode.getExtra().put("sql", request.getSql());
             // 添加字段关系节点
-            context.getProcessNodeList().add(fieldProcessNode);
+            context.getRelationNodeList().add(fieldRelationNode);
         });
     }
 
@@ -118,14 +117,14 @@ public class SqlMessageHandler implements BaseMessageHandler {
         context.getTableNodeList().addAll(sourceTableNodeList);
         List<String> sourceNodePkList = sourceTableNodeList.stream().map(BaseNodeEntity::getPk).distinct().collect(Collectors.toList());
         // 表关系节点
-        ProcessNode processNode = new ProcessNode(NeoConstant.ProcessType.TABLE_PROCESS, sourceNodePkList, targetTableNode.getPk());
-        processNode.setType(HandlerConstant.SOURCE_TYPE_SQL_PARSER);
+        RelationNode relationNode = new RelationNode(NeoConstant.RelationType.TABLE_RELATION, sourceNodePkList, targetTableNode.getPk());
+        relationNode.setType(HandlerConstant.SOURCE_TYPE_SQL_PARSER);
         // 填充 dataSourceName
-        LineageUtil.fillingProcessNode(targetTableNode, processNode);
+        LineageUtil.fillingRelationNode(targetTableNode, relationNode);
         // 执行的SQL
-        processNode.getExtra().put("sql", request.getSql());
+        relationNode.getExtra().put("sql", request.getSql());
         // 添加表关系节点
-        context.getProcessNodeList().add(processNode);
+        context.getRelationNodeList().add(relationNode);
     }
 
     private FieldNode buildFieldNodeNeo4j(SqlRequestContext context, ParseColumnNode parserParseColumnNode) {

@@ -1,6 +1,6 @@
 package com.eyesmoons.lineage.event.handler;
 
-import com.eyesmoons.lineage.event.domain.model.ProcessNode;
+import com.eyesmoons.lineage.event.domain.model.RelationNode;
 import com.eyesmoons.lineage.event.domain.repository.*;
 import com.eyesmoons.lineage.event.domain.service.RelationshipService;
 import org.apache.commons.collections.CollectionUtils;
@@ -26,7 +26,7 @@ public class MergeStorageHandler implements BaseStorageHandler {
     private FieldRepository fieldRepository;
 
     @Autowired
-    private ProcessRepository processRepository;
+    private RelationRepository relationRepository;
 
     @Autowired
     private DataSourceRepository dataSourceRepository;
@@ -50,18 +50,18 @@ public class MergeStorageHandler implements BaseStorageHandler {
         // table -> fields
         tableRepository.mergeRelWithField();
         // 创建输入输出关系
-        this.createOrUpdateProcessRelationship(lineageMapping);
+        this.createOrUpdateRelationship(lineageMapping);
     }
 
-    private void createOrUpdateProcessRelationship(LineageContext lineageMapping) {
-        List<ProcessNode> processNodeList = lineageMapping.getProcessNodeList();
-        if (CollectionUtils.isEmpty(processNodeList)) {
+    private void createOrUpdateRelationship(LineageContext lineageMapping) {
+        List<RelationNode> relationNodeList = lineageMapping.getRelationNodeList();
+        if (CollectionUtils.isEmpty(relationNodeList)) {
             return;
         }
-        processNodeList.forEach(processNode -> {
-            // table | fields -> (process_in) -> process
-            relationshipService.mergeRelProcessInputs(processNode.getSourceNodePkList(), processNode.getPk());
-            processRepository.mergeRelProcessOutput(processNode.getPk(), processNode.getTargetNodePk());
+        relationNodeList.forEach(relationNode -> {
+            // table | fields -> (relation_in) -> relation
+            relationshipService.mergeRelRelationInputs(relationNode.getSourceNodePkList(), relationNode.getPk());
+            relationRepository.mergeRelRelationOutput(relationNode.getPk(), relationNode.getTargetNodePk());
         });
     }
 
@@ -74,7 +74,7 @@ public class MergeStorageHandler implements BaseStorageHandler {
         tableRepository.saveAll(lineageMapping.getTableNodeList());
         // field
         fieldRepository.saveAll(lineageMapping.getFieldNodeList());
-        // process
-        processRepository.saveAll(lineageMapping.getProcessNodeList());
+        // relation
+        relationRepository.saveAll(lineageMapping.getRelationNodeList());
     }
 }

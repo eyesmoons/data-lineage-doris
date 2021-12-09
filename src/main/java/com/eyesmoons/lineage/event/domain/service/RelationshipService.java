@@ -8,9 +8,9 @@ import java.util.List;
 public interface RelationshipService {
 
     /**
-     * 批量合并process 以多对一的方式合并去建立关系 TABLE|FIELD -(PROCESS_IN)> Process
+     * 批量合并relation 以多对一的方式合并去建立关系 table|field -(relation_in)> relation
      * @param starts 开始节点的列表
      * @param end    结束节点
      */
-    void mergeRelProcessInputs(List<String> starts, String end);
+    void mergeRelRelationInputs(List<String> starts, String end);
 }

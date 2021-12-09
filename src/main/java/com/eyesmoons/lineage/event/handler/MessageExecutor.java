@@ -1,5 +1,6 @@
 package com.eyesmoons.lineage.event.handler;
 
+import com.eyesmoons.lineage.common.util.JSON;
 import com.eyesmoons.lineage.event.contants.NeoConstant;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -32,10 +33,10 @@ public class MessageExecutor {
             Objects.requireNonNull(messageHandler, "messageHandler required");
             // 获取消息上下文
             LineageContext lineageContext = messageHandler.handle(record);
-            log.info("关系节点：{}", lineageContext.getProcessNodeList());
-            log.info("数据库节点：{}", lineageContext.getDbNodeList());
-            log.info("表血缘：{}", lineageContext.getTableNodeList());
-            log.info("字段血缘：{}", lineageContext.getFieldNodeList());
+            log.info("关系节点：{}", JSON.toJson(lineageContext.getRelationNodeList()));
+            log.info("数据库节点：{}", JSON.toJson(lineageContext.getDbNodeList()));
+            log.info("表血缘：{}", JSON.toJson(lineageContext.getTableNodeList()));
+            log.info("字段血缘：{}", JSON.toJson(lineageContext.getFieldNodeList()));
             Objects.requireNonNull(lineageContext, "lineageContext required");
             // 消息存储
             mergeStorageHandler.handle(lineageContext);

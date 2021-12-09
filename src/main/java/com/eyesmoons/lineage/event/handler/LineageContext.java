@@ -24,7 +24,7 @@ public class LineageContext {
     private final List<DbNode> dbNodeList = new ArrayList<>();
     private final List<TableNode> tableNodeList = new ArrayList<>();
     private final List<FieldNode> fieldNodeList = new ArrayList<>();
-    private final List<ProcessNode> processNodeList = new ArrayList<>();
+    private final List<RelationNode> relationNodeList = new ArrayList<>();
 
     private SqlMessage sqlMessage;
 }
