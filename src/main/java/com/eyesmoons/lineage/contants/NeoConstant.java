@@ -32,6 +32,5 @@ public class NeoConstant {
 
     public static class SourceType {
         public static final String SQL = "SQL";
-        public static final String SQOOP = "SQOOP";
     }
 }

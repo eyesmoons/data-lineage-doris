@@ -12,11 +12,11 @@ import java.util.List;
 /**
  * JSON 工具类
  */
-public final class JSON {
+public final class JSONUtil {
 
     private static ObjectMapper objectMapper = ApplicationContextHelper.getContext().getBean(ObjectMapper.class);
 
-    private JSON() throws IllegalAccessException {
+    private JSONUtil() throws IllegalAccessException {
         throw new IllegalAccessException("Cannot Be Accessed!");
     }
 

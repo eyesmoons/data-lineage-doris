@@ -1,5 +1,6 @@
 package com.eyesmoons.lineage.handler;
 
+import com.eyesmoons.lineage.model.response.DorisSqlAudit;
 import com.eyesmoons.lineage.model.response.LineageContext;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
@@ -8,5 +9,5 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
  */
 public interface BaseMessageHandler {
 
-    LineageContext handle(ConsumerRecord<String, String> record);
+    LineageContext handle(DorisSqlAudit audit);
 }

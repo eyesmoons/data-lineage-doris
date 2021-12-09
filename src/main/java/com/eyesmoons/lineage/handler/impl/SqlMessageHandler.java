@@ -1,9 +1,11 @@
 package com.eyesmoons.lineage.handler.impl;
 
 
+import com.eyesmoons.lineage.contants.Constants;
 import com.eyesmoons.lineage.exception.CustomException;
 import com.eyesmoons.lineage.handler.BaseMessageHandler;
-import com.eyesmoons.lineage.utils.JSON;
+import com.eyesmoons.lineage.model.response.DorisSqlAudit;
+import com.eyesmoons.lineage.utils.JSONUtil;
 import com.eyesmoons.lineage.annotation.SourceHandler;
 import com.eyesmoons.lineage.contants.HandlerConstant;
 import com.eyesmoons.lineage.contants.NeoConstant;
@@ -36,12 +38,17 @@ import java.util.stream.Collectors;
 @Slf4j
 public class SqlMessageHandler implements BaseMessageHandler {
 
+    private static final String DATA_SOURCE_NAME = "test_doris";
+
     @Autowired
     private DefaultHandlerChain defaultHandlerChain;
 
     @Override
-    public LineageContext handle(ConsumerRecord<String, String> record) {
-        SqlMessage sqlMessage = JSON.toObj(record.value(), SqlMessage.class);
+    public LineageContext handle(DorisSqlAudit audit) {
+        SqlMessage sqlMessage = new SqlMessage();
+        sqlMessage.setSql(audit.getStmt());
+        sqlMessage.setDataSourceName(DATA_SOURCE_NAME);
+        sqlMessage.setDbType(Constants.DEFAULT_DB_TYPE);
         LineageContext context = new LineageContext();
         context.setSqlMessage(sqlMessage);
         // 处理
