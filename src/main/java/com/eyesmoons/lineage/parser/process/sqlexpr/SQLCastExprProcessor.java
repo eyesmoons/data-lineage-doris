@@ -2,7 +2,7 @@ package com.eyesmoons.lineage.parser.process.sqlexpr;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.expr.SQLCastExpr;
-import com.eyesmoons.lineage.parser.anotation.SQLObjectType;
+import com.eyesmoons.lineage.annotation.SQLObjectType;
 import com.eyesmoons.lineage.parser.process.ProcessorRegister;
 import com.eyesmoons.lineage.parser.process.SqlExprContent;
 

@@ -3,10 +3,10 @@ package com.eyesmoons.lineage.parser.process.tablesource;
 import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.statement.SQLJoinTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLTableSource;
-import com.eyesmoons.lineage.parser.anotation.SQLObjectType;
-import com.eyesmoons.lineage.parser.contants.ParserConstant;
-import com.eyesmoons.lineage.parser.model.TableNode;
-import com.eyesmoons.lineage.parser.model.TreeNode;
+import com.eyesmoons.lineage.annotation.SQLObjectType;
+import com.eyesmoons.lineage.contants.ParserConstant;
+import com.eyesmoons.lineage.model.parser.ParseTableNode;
+import com.eyesmoons.lineage.model.parser.TreeNode;
 import com.eyesmoons.lineage.parser.process.ProcessorRegister;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -24,15 +24,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class SQLJoinTableSourceProcessor implements TableSourceProcessor {
 
     @Override
-    public void process(String dbType, AtomicInteger sequence, TreeNode<TableNode> parent, SQLTableSource sqlTableSource) {
-        TableNode proxyTable = TableNode.builder()
+    public void process(String dbType, AtomicInteger sequence, TreeNode<ParseTableNode> parent, SQLTableSource sqlTableSource) {
+        ParseTableNode proxyTable = ParseTableNode.builder()
                 .isVirtualTemp(true)
                 .expression(SQLUtils.toSQLString(sqlTableSource))
                 .name(ParserConstant.TEMP_TABLE_PREFIX + sequence.incrementAndGet())
                 .alias(sqlTableSource.getAlias())
                 .build();
 
-        TreeNode<TableNode> proxyNode = TreeNode.of(proxyTable);
+        TreeNode<ParseTableNode> proxyNode = TreeNode.of(proxyTable);
         parent.addChild(proxyNode);
 
         SQLJoinTableSource sqlJoinTableSource = (SQLJoinTableSource) sqlTableSource;

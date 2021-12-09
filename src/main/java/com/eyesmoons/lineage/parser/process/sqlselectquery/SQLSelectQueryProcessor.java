@@ -1,8 +1,8 @@
 package com.eyesmoons.lineage.parser.process.sqlselectquery;
 
 import com.alibaba.druid.sql.ast.statement.SQLSelectQuery;
-import com.eyesmoons.lineage.parser.model.TableNode;
-import com.eyesmoons.lineage.parser.model.TreeNode;
+import com.eyesmoons.lineage.model.parser.ParseTableNode;
+import com.eyesmoons.lineage.model.parser.TreeNode;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -18,6 +18,6 @@ public interface SQLSelectQueryProcessor {
      * @param parent         传入的节点
      * @param sqlSelectQuery SQLSelectQuery子类
      */
-    void process(String dbType, AtomicInteger sequence, TreeNode<TableNode> parent, SQLSelectQuery sqlSelectQuery);
+    void process(String dbType, AtomicInteger sequence, TreeNode<ParseTableNode> parent, SQLSelectQuery sqlSelectQuery);
 
 }
