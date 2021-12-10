@@ -52,7 +52,7 @@ public class RelationshipServiceImpl implements RelationshipService {
         List<Map<String, Object>> resultMapList = new ArrayList<>();
         result.forEach(resultMapList::add);
         if (resultMapList.size() != starts.size()) {
-            throw new CustomException("execute recode num [%s] != success num [%s]. maybe neo4j question", starts.size(), resultMapList.size());
+            log.warn("execute recode num [" + starts.size() + "] != success num [" + resultMapList.size() + "]. maybe neo4j question");
         }
     }
 }
