@@ -8,6 +8,7 @@ import com.eyesmoons.lineage.annotation.SQLObjectType;
 import com.eyesmoons.lineage.model.parser.ParseTableNode;
 import com.eyesmoons.lineage.model.parser.TreeNode;
 import com.eyesmoons.lineage.parser.process.ProcessorRegister;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -20,10 +21,12 @@ import java.util.concurrent.atomic.AtomicInteger;
  * ) temp
  */
 @SQLObjectType(clazz = SQLCreateViewStatement.class)
+@Slf4j
 public class SQLCreateViewStatementProcessor extends AbstractStatementProcessor {
 
     @Override
     public void doProcess(String dbType, AtomicInteger sequence, TreeNode<ParseTableNode> root, SQLStatement statement) {
+        log.info("处理Create View语句");
         SQLCreateViewStatement createViewStatement = (SQLCreateViewStatement) statement;
         SQLExprTableSource sqlExprTableSource = createViewStatement.getTableSource();
         // 构建根表

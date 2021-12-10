@@ -1,8 +1,13 @@
 package com.eyesmoons.lineage.model.parser;
 
+import com.eyesmoons.lineage.utils.StringUtil;
 import lombok.Builder;
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Consumer;
 
 /**
  * 数据血缘解析时表节点
@@ -42,7 +47,7 @@ public class ParseTableNode {
     private String expression;
 
     public String getDbName() {
-        return dbName;
+        return StringUtils.isBlank(dbName) ? "" : dbName.trim().replace("`","");
     }
 
     public void setDbName(String dbName) {
@@ -50,7 +55,7 @@ public class ParseTableNode {
     }
 
     public String getName() {
-        return name;
+        return StringUtils.isBlank(name) ? "" : name.trim().replace("`","");
     }
 
     public void setName(String name) {

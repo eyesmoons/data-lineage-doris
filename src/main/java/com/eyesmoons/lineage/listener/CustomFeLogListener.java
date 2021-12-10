@@ -43,10 +43,10 @@ public class CustomFeLogListener {
                 Objects.requireNonNull(messageHandler, "messageHandler required");
                 // 获取消息上下文
                 LineageContext lineageContext = messageHandler.handle(audit);
-                log.info("关系节点：{}", JSONUtil.toJson(lineageContext.getRelationNodeList()));
-                log.info("数据库节点：{}", JSONUtil.toJson(lineageContext.getDbNodeList()));
-                log.info("表血缘：{}", JSONUtil.toJson(lineageContext.getTableNodeList()));
-                log.info("字段血缘：{}", JSONUtil.toJson(lineageContext.getFieldNodeList()));
+                log.info("relation：{}", JSONUtil.toJson(lineageContext.getRelationNodeList()));
+                log.info("db：{}", JSONUtil.toJson(lineageContext.getDbNodeList()));
+                log.info("table：{}", JSONUtil.toJson(lineageContext.getTableNodeList()));
+                log.info("field：{}", JSONUtil.toJson(lineageContext.getFieldNodeList()));
                 Objects.requireNonNull(lineageContext, "lineageContext required");
                 // 消息存储
                 mergeStorageHandler.handle(lineageContext);
