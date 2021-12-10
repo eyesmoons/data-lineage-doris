@@ -8,6 +8,7 @@ import com.eyesmoons.lineage.contants.ParserConstant;
 import com.eyesmoons.lineage.model.parser.ParseTableNode;
 import com.eyesmoons.lineage.model.parser.TreeNode;
 import com.eyesmoons.lineage.parser.process.ProcessorRegister;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -21,10 +22,12 @@ import java.util.concurrent.atomic.AtomicInteger;
  * t1.a1 = temp1.a1
  */
 @SQLObjectType(clazz = SQLJoinTableSource.class)
+@Slf4j
 public class SQLJoinTableSourceProcessor implements TableSourceProcessor {
 
     @Override
     public void process(String dbType, AtomicInteger sequence, TreeNode<ParseTableNode> parent, SQLTableSource sqlTableSource) {
+        log.info("开始处理SQLJoinTableSource");
         ParseTableNode proxyTable = ParseTableNode.builder()
                 .isVirtualTemp(true)
                 .expression(SQLUtils.toSQLString(sqlTableSource))

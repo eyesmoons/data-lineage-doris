@@ -8,6 +8,7 @@ import com.eyesmoons.lineage.contants.ParserConstant;
 import com.eyesmoons.lineage.model.parser.ParseTableNode;
 import com.eyesmoons.lineage.model.parser.TreeNode;
 import com.eyesmoons.lineage.parser.process.ProcessorRegister;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 
 import java.util.List;
@@ -24,11 +25,12 @@ import java.util.concurrent.atomic.AtomicInteger;
  * select c1,c2,c3 from table_c
  */
 @SQLObjectType(clazz = SQLUnionQuery.class)
+@Slf4j
 public class SQLUnionQueryProcessor extends AbstractSQLSelectQueryProcessor {
 
     @Override
-    public void process(String dbType, AtomicInteger sequence, TreeNode<ParseTableNode> parent,
-                        SQLSelectQuery sqlSelectQuery) {
+    public void process(String dbType, AtomicInteger sequence, TreeNode<ParseTableNode> parent, SQLSelectQuery sqlSelectQuery) {
+        log.info("处理union查询语句");
         ParseTableNode proxyTable = ParseTableNode.builder()
                 .isVirtualTemp(true)
                 .expression(SQLUtils.toSQLString(sqlSelectQuery))

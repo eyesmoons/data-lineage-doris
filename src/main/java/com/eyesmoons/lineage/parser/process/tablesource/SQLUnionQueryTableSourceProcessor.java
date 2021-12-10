@@ -10,6 +10,7 @@ import com.eyesmoons.lineage.model.parser.ParseColumnNode;
 import com.eyesmoons.lineage.model.parser.ParseTableNode;
 import com.eyesmoons.lineage.model.parser.TreeNode;
 import com.eyesmoons.lineage.parser.process.ProcessorRegister;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
@@ -29,10 +30,12 @@ import java.util.concurrent.atomic.AtomicInteger;
  * )t
  */
 @SQLObjectType(clazz = SQLUnionQueryTableSource.class)
+@Slf4j
 public class SQLUnionQueryTableSourceProcessor implements TableSourceProcessor {
 
     @Override
     public void process(String dbType, AtomicInteger sequence, TreeNode<ParseTableNode> parent, SQLTableSource sqlTableSource) {
+        log.info("开始处理SQLUnionQueryTableSource");
         SQLUnionQueryTableSource sqlUnionQueryTableSource = (SQLUnionQueryTableSource) sqlTableSource;
         // union的特殊处理
         // 提取获取后面的union字段，

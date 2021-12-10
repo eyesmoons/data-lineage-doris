@@ -103,7 +103,8 @@ public class DefaultColumnLineageTracer implements ColumnLineageTracer {
     }
 
     private void possibleColumnSource(TreeNode<ParseColumnNode> currentColumnNode, List<TreeNode<ParseTableNode>> nearestTableNodeList) {
-        if (!CollectionUtils.isEmpty(nearestTableNodeList) && nearestTableNodeList.size() == 1 && nearestTableNodeList.get(0).isLeaf()) {
+        // 如果是叶子节点
+        if (CollectionUtils.isNotEmpty(nearestTableNodeList) && nearestTableNodeList.size() == 1 && nearestTableNodeList.get(0).isLeaf()) {
             // 2. 终止
             TreeNode<ParseColumnNode> endColumnNode = new TreeNode<>();
             currentColumnNode.addChild(endColumnNode);
@@ -115,7 +116,9 @@ public class DefaultColumnLineageTracer implements ColumnLineageTracer {
                             .build());
         } else {
             // 兜底：记录找不到的信息
-            log.warn("columnNodeTree:{} not ended", currentColumnNode.getValue().getTableName() + "." + currentColumnNode.getValue().getName());
+            String tableName = currentColumnNode.getValue().getTableName();
+            String columnName = currentColumnNode.getValue().getName();
+            log.warn("columnNodeTree:{} not ended", StringUtils.isBlank(tableName) ? columnName : (tableName + "." + columnName));
         }
     }
 

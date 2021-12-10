@@ -8,6 +8,7 @@ import com.eyesmoons.lineage.annotation.SQLObjectType;
 import com.eyesmoons.lineage.model.parser.ParseTableNode;
 import com.eyesmoons.lineage.model.parser.TreeNode;
 import com.eyesmoons.lineage.parser.process.ProcessorRegister;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -15,10 +16,12 @@ import java.util.concurrent.atomic.AtomicInteger;
  * MySqlInsertStatement 处理
  */
 @SQLObjectType(clazz = MySqlInsertStatement.class)
+@Slf4j
 public class MySqlInsertStatementProcessor extends AbstractStatementProcessor {
 
     @Override
     public void doProcess(String dbType, AtomicInteger sequence, TreeNode<ParseTableNode> root, SQLStatement statement) {
+        log.info("处理insert语句");
         MySqlInsertStatement mysqlInsertStatement = (MySqlInsertStatement) statement;
         SQLExprTableSource sqlExprTableSource = mysqlInsertStatement.getTableSource();
         // 构建根表

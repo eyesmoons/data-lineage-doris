@@ -1,6 +1,7 @@
 package com.eyesmoons.lineage.model.parser;
 
 import lombok.Builder;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -74,7 +75,7 @@ public class ParseColumnNode {
     }
 
     public String getTableName() {
-        return tableName;
+        return StringUtils.isBlank(tableName) ? "" : tableName.trim().replace("`","");
     }
 
     public void setTableName(String tableName) {
@@ -82,7 +83,7 @@ public class ParseColumnNode {
     }
 
     public String getName() {
-        return name;
+        return StringUtils.isBlank(name) ? "" : name.trim().replace("`","");
     }
 
     public void setName(String name) {

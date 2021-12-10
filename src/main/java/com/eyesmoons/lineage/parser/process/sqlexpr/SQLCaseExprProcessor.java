@@ -5,6 +5,7 @@ import com.alibaba.druid.sql.ast.expr.SQLCaseExpr;
 import com.eyesmoons.lineage.annotation.SQLObjectType;
 import com.eyesmoons.lineage.parser.process.ProcessorRegister;
 import com.eyesmoons.lineage.parser.process.SqlExprContent;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,11 +21,13 @@ import java.util.stream.Collectors;
  * END
  */
 @SQLObjectType(clazz = SQLCaseExpr.class)
+@Slf4j
 public class SQLCaseExprProcessor implements SQLExprProcessor {
 
     @Override
     public void process(String dbType, SQLExpr expr, SqlExprContent content) {
         SQLCaseExpr sqlCaseExpr = (SQLCaseExpr) expr;
+        log.info("处理CASE表达式:{}", sqlCaseExpr);
         this.getAllCaseExprChild(sqlCaseExpr).forEach(expr1 -> ProcessorRegister.getSQLExprProcessor(expr1.getClass()).process(dbType, expr1, content));
     }
 
