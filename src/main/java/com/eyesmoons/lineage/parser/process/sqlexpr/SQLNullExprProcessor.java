@@ -9,7 +9,6 @@ import com.eyesmoons.lineage.parser.process.SqlExprContent;
 public class SQLNullExprProcessor implements SQLExprProcessor{
     @Override
     public void process(String dbType, SQLExpr expr, SqlExprContent content) {
-        SQLNullExpr sqlNullExpr = (SQLNullExpr) expr;
-        content.addItem(SqlExprContent.builder().name(sqlNullExpr.getParent().toString()).owner(sqlNullExpr.getParent().toString()).build());
+
     }
 }

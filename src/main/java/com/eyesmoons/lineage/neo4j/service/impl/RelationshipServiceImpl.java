@@ -1,5 +1,6 @@
 package com.eyesmoons.lineage.neo4j.service.impl;
 
+import com.eyesmoons.lineage.exception.CustomException;
 import com.eyesmoons.lineage.utils.StringPool;
 import com.eyesmoons.lineage.neo4j.service.RelationshipService;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -43,15 +45,14 @@ public class RelationshipServiceImpl implements RelationshipService {
             return;
         }
 
-        String cql = String.format( MERGE_RELATION_INPUTS, starts.stream().collect(Collectors.joining(DELIMITER, StringPool.SINGLE_QUOTE, StringPool.SINGLE_QUOTE)), end);
+        String cql = String.format( MERGE_RELATION_INPUTS, starts.stream().map(s -> s.replace("'","\\'")).collect(Collectors.joining(DELIMITER, StringPool.SINGLE_QUOTE, StringPool.SINGLE_QUOTE)), end);
         log.debug("execute cql is [{}]", cql);
         Session session = sessionFactory.openSession();
         Result result = session.query(cql, Collections.emptyMap());
         List<Map<String, Object>> resultMapList = new ArrayList<>();
         result.forEach(resultMapList::add);
         if (resultMapList.size() != starts.size()) {
-            log.error("execute recode num [{}] != success num [{}]. maybe neo4j question. current cql is [{}]", starts.size(), resultMapList.size(), cql);
-            // throw new CommonException("execute recode num [%s] != success num [%s]. maybe neo4j question", starts.size(), resultMapList.size());
+            throw new CustomException("execute recode num [%s] != success num [%s]. maybe neo4j question", starts.size(), resultMapList.size());
         }
     }
 }

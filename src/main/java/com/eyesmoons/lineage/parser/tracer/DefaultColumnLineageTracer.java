@@ -21,7 +21,7 @@ public class DefaultColumnLineageTracer implements ColumnLineageTracer {
 
     /**
      * Long tableId 节点ID
-     * List<TreeNode<TableNode>>> 某一节点最近的节点
+     * List<TreeNode<TableNode>> 某一节点最近的节点
      */
     private final Map<Long, List<TreeNode<ParseTableNode>>> recentTreeNodeMap = new HashMap<>();
 
