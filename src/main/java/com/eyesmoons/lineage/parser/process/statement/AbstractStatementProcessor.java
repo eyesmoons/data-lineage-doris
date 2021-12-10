@@ -47,6 +47,6 @@ public abstract class AbstractStatementProcessor implements StatementProcessor {
     }
 
     protected void after(String dbType, AtomicInteger sequence, TreeNode<ParseTableNode> root, SQLStatement statement) {
-        log.info("解析完成，AST语法树信息：{} \n 源SQL：{}", JSONObject.toJSONString(root), statement);
+        log.debug("解析完成，AST语法树信息：{} \n 源SQL：{}", JSONObject.toJSONString(root), statement);
     }
 }
