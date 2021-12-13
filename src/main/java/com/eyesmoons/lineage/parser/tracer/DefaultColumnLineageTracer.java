@@ -2,7 +2,11 @@ package com.eyesmoons.lineage.parser.tracer;
 
 import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLStatement;
+import com.alibaba.druid.sql.ast.statement.SQLUseStatement;
 import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlSchemaStatVisitor;
+import com.alibaba.druid.sql.visitor.SchemaStatVisitor;
+import com.alibaba.druid.stat.TableStat;
+import com.alibaba.druid.util.JdbcConstants;
 import com.eyesmoons.lineage.exception.ParserException;
 import com.eyesmoons.lineage.model.parser.ParseColumnNode;
 import com.eyesmoons.lineage.model.parser.ParseTableNode;
@@ -12,6 +16,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * 默认字段血缘生成逻辑
@@ -103,6 +108,7 @@ public class DefaultColumnLineageTracer implements ColumnLineageTracer {
     }
 
     private void possibleColumnSource(TreeNode<ParseColumnNode> currentColumnNode, List<TreeNode<ParseTableNode>> nearestTableNodeList) {
+        String columnName = currentColumnNode.getValue().getName();
         // 如果是叶子节点
         if (CollectionUtils.isNotEmpty(nearestTableNodeList) && nearestTableNodeList.size() == 1 && nearestTableNodeList.get(0).isLeaf()) {
             // 2. 终止
@@ -115,11 +121,40 @@ public class DefaultColumnLineageTracer implements ColumnLineageTracer {
                             .owner(nearestTableNodeList.get(0).getValue())
                             .build());
         } else {
-            // 兜底：记录找不到的信息
-            String tableName = currentColumnNode.getValue().getTableName();
-            String columnName = currentColumnNode.getValue().getName();
-            log.warn("columnNodeTree:{} not ended", StringUtils.isBlank(tableName) ? columnName : (tableName + "." + columnName));
+            if (nearestTableNodeList.size() > 0){
+                String originSql = findOriginSql(currentColumnNode.getParent());
+                Map<String, TreeMap<String, List<String>>> tableAndField = getTableAndField(originSql, "");
+                tableAndField.get("select").forEach((tbl, columns) -> columns.forEach(column -> {
+                    if (Objects.equals(columnName.trim().replace("`",""), column.trim().replace("`",""))) {
+                        AtomicReference<ParseTableNode> owner = new AtomicReference<>();
+                        nearestTableNodeList.forEach(item -> item.getChildList().forEach(item2 -> {
+                            String expression = item2.getValue().getExpression();
+                            if (Objects.equals(tbl.trim().replace("`",""), expression.trim().replace("`",""))) {
+                                owner.getAndSet(item2.getValue());
+                            }
+                        }));
+                        TreeNode<ParseColumnNode> endColumnNode = new TreeNode<>();
+                        currentColumnNode.addChild(endColumnNode);
+                        endColumnNode.setValue(ParseColumnNode.builder()
+                                .name(columnName.trim().replace("`",""))
+                                .tableName(tbl.trim().replace("`",""))
+                                .owner(owner.get())
+                                .build());
+                    }
+                }));
+            } else {
+                // 兜底：记录找不到的信息
+                String tableName = currentColumnNode.getValue().getTableName();
+                log.warn("columnNodeTree:{} not ended", StringUtils.isBlank(tableName) ? columnName : (tableName + "." + columnName));
+            }
         }
+    }
+
+    private String findOriginSql(TreeNode<ParseColumnNode> parent) {
+        if (Objects.nonNull(parent.getParent())) {
+            return findOriginSql(parent.getParent());
+        }
+        return parent.getValue().getTableExpression();
     }
 
     /**
@@ -196,5 +231,80 @@ public class DefaultColumnLineageTracer implements ColumnLineageTracer {
         MySqlSchemaStatVisitor mysqlSchemaStatVisitor = new MySqlSchemaStatVisitor();
         stmt.accept(mysqlSchemaStatVisitor);
         return mysqlSchemaStatVisitor.getTables().keySet().stream().findFirst().orElseThrow(() -> new ParserException("repair missing table failed,column expression[%s].", parseColumnNode.getExpression())).getName();
+    }
+
+    public static Map<String, TreeMap<String, List<String>>> getTableAndField(String sql, String database) {
+        List<SQLStatement> stmts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
+        Map<String, TreeMap<String, List<String>>> result = new HashMap<>();
+
+        TreeMap<String, List<String>> selectSet = new TreeMap<>();
+        TreeMap<String, List<String>> updateSet = new TreeMap<>();
+        TreeMap<String, List<String>> insertSet = new TreeMap<>();
+        TreeMap<String, List<String>> deleteSet = new TreeMap<>();
+
+        List<String> updateList = new ArrayList<>();
+        List<String> insertList = new ArrayList<>();
+        List<String> deletetList = new ArrayList<>();
+
+        for (SQLStatement stmt : stmts) {
+            SchemaStatVisitor statVisitor = SQLUtils.createSchemaStatVisitor(stmts, JdbcConstants.MYSQL);
+            if (stmt instanceof SQLUseStatement) {
+                database = ((SQLUseStatement) stmt).getDatabase().getSimpleName();
+            }
+            stmt.accept(statVisitor);
+            Map<TableStat.Name, TableStat> tables = statVisitor.getTables();
+            Collection<TableStat.Column> columns = statVisitor.getColumns();
+            //解析表名，字段
+            if (Objects.nonNull(tables)) {
+                for (Map.Entry<TableStat.Name, TableStat> table : tables.entrySet()) {
+                    TableStat.Name tableName = table.getKey();
+                    TableStat stat = table.getValue();
+                    if (stat.getCreateCount() > 0 || stat.getInsertCount() > 0) {
+                        String insert = tableName.getName();
+                        if (insert.contains(".")) {
+                            String[] split = insert.split("\\.");
+                            insert = split[1];
+                        }
+                        columns.stream().filter(column -> Objects.equals(column.getTable().toLowerCase(), tableName.getName().toLowerCase())).forEach(column -> {
+                            insertList.add(column.getName().toLowerCase());
+                        });
+                        insertSet.put(insert, insertList);
+                    } else if (stat.getSelectCount() > 0) {
+                        String select = tableName.getName();
+                        if (!select.contains("."))
+                            select = database + "." + select;
+                        List<String> stringList = new ArrayList<>();
+                        for (TableStat.Column column : columns) {
+                            if (Objects.equals(column.getTable().toLowerCase(), tableName.getName().toLowerCase())) {
+                                stringList.add(column.getName());
+                            }
+                        }
+                        selectSet.put(select, stringList);
+                    } else if (stat.getUpdateCount() > 0) {
+                        String update = tableName.getName();
+                        if (!update.contains("."))
+                            update = database + "." + update;
+                        columns.stream().filter(column -> Objects.equals(column.getTable().toLowerCase(), tableName.getName().toLowerCase())).forEach(column -> {
+                            updateList.add(column.getName().toLowerCase());
+                        });
+                        updateSet.put(update, updateList);
+                    } else if (stat.getDeleteCount() > 0) {
+                        String delete = tableName.getName();
+                        if (!delete.contains("."))
+                            delete = database + "." + delete;
+                        columns.stream().filter(column -> Objects.equals(column.getTable().toLowerCase(), tableName.getName().toLowerCase())).forEach(column -> {
+                            deletetList.add(column.getName().toLowerCase());
+                        });
+                        deleteSet.put(delete, deletetList);
+                    }
+                }
+            }
+        }
+
+        result.put("select", selectSet);
+        result.put("insert", insertSet);
+        result.put("update", updateSet);
+        result.put("delete", deleteSet);
+        return result;
     }
 }
