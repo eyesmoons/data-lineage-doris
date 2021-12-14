@@ -183,6 +183,7 @@
                 <directory>src/main/resources</directory>
                 <includes>
                     <include>**/*.properties</include>
+                    <include>**/*.txt</include>
                 </includes>
                 <filtering>false</filtering>
             </resource>
