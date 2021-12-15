@@ -19,7 +19,6 @@ public class SQLBinaryOpExprProcessor implements SQLExprProcessor {
     @Override
     public void process(String dbType, SQLExpr expr, SqlExprContent content) {
         SQLBinaryOpExpr sqlBinaryOpExpr = (SQLBinaryOpExpr) expr;
-        log.info("处理算数运算表达式:{}", sqlBinaryOpExpr);
         ProcessorRegister.getSQLExprProcessor(sqlBinaryOpExpr.getLeft().getClass()).process(dbType, sqlBinaryOpExpr.getLeft(), content);
         ProcessorRegister.getSQLExprProcessor(sqlBinaryOpExpr.getRight().getClass()).process(dbType, sqlBinaryOpExpr.getRight(), content);
     }

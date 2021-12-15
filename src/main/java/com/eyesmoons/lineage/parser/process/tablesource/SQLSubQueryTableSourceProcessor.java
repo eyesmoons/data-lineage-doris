@@ -21,7 +21,6 @@ public class SQLSubQueryTableSourceProcessor implements TableSourceProcessor {
 
     @Override
     public void process(String dbType, AtomicInteger sequence, TreeNode<ParseTableNode> parent, SQLTableSource sqlTableSource) {
-        log.info("开始处理SQLSubQueryTableSource");
         SQLSelectQuery sqlSelectQuery = ((SQLSubqueryTableSource) sqlTableSource).getSelect().getQuery();
         ProcessorRegister.getSQLSelectQueryProcessor(sqlSelectQuery.getClass()).process(dbType, sequence, parent, sqlSelectQuery);
     }

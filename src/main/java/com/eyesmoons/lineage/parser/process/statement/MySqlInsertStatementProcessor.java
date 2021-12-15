@@ -21,7 +21,6 @@ public class MySqlInsertStatementProcessor extends AbstractStatementProcessor {
 
     @Override
     public void doProcess(String dbType, AtomicInteger sequence, TreeNode<ParseTableNode> root, SQLStatement statement) {
-        log.info("处理insert语句");
         MySqlInsertStatement mysqlInsertStatement = (MySqlInsertStatement) statement;
         SQLExprTableSource sqlExprTableSource = mysqlInsertStatement.getTableSource();
         // 构建根表

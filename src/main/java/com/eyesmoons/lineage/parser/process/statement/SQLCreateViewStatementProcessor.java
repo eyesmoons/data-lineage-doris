@@ -26,7 +26,6 @@ public class SQLCreateViewStatementProcessor extends AbstractStatementProcessor 
 
     @Override
     public void doProcess(String dbType, AtomicInteger sequence, TreeNode<ParseTableNode> root, SQLStatement statement) {
-        log.info("处理Create View语句");
         SQLCreateViewStatement createViewStatement = (SQLCreateViewStatement) statement;
         SQLExprTableSource sqlExprTableSource = createViewStatement.getTableSource();
         // 构建根表

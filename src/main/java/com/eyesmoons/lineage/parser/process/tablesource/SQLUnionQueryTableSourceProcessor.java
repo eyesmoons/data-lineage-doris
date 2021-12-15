@@ -35,7 +35,6 @@ public class SQLUnionQueryTableSourceProcessor implements TableSourceProcessor {
 
     @Override
     public void process(String dbType, AtomicInteger sequence, TreeNode<ParseTableNode> parent, SQLTableSource sqlTableSource) {
-        log.info("开始处理SQLUnionQueryTableSource");
         SQLUnionQueryTableSource sqlUnionQueryTableSource = (SQLUnionQueryTableSource) sqlTableSource;
         // union的特殊处理
         // 提取获取后面的union字段，

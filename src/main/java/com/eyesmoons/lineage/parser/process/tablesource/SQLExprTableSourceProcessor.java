@@ -22,7 +22,6 @@ public class SQLExprTableSourceProcessor implements TableSourceProcessor {
 
     @Override
     public void process(String dbType, AtomicInteger sequence, TreeNode<ParseTableNode> parent, SQLTableSource sqlTableSource) {
-        log.info("开始处理SQLExprTableSource");
         ParseTableNode proxyTable = ParseTableNode.builder()
                 .expression(SQLUtils.toSQLString(sqlTableSource))
                 .alias(sqlTableSource.getAlias())

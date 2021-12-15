@@ -23,7 +23,6 @@ public class SQLMethodInvokeExprProcessor implements SQLExprProcessor {
     @Override
     public void process(String dbType, SQLExpr expr, SqlExprContent content) {
         SQLMethodInvokeExpr sqlMethodInvokeExpr = (SQLMethodInvokeExpr) expr;
-        log.info("处理函数表达式:{}", sqlMethodInvokeExpr);
         this.getAllCaseExprChild(sqlMethodInvokeExpr).forEach(ep -> ProcessorRegister.getSQLExprProcessor(ep.getClass()).process(dbType, ep, content));
     }
 

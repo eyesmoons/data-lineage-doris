@@ -17,7 +17,6 @@ public class SQLIdentifierExprProcessor implements SQLExprProcessor {
     @Override
     public void process(String dbType, SQLExpr expr, SqlExprContent content) {
         SQLIdentifierExpr sqlIdentifierExpr = (SQLIdentifierExpr) expr;
-        log.info("处理修饰词表达式:{}", sqlIdentifierExpr);
         // 第一层 除了SQLIdentifierExpr 外，其它可看作是需要查找来源字段的
         content.addItem(SqlExprContent.builder().name(sqlIdentifierExpr.getName()).build());
     }

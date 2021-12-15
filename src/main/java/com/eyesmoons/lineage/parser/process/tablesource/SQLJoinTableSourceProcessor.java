@@ -27,7 +27,6 @@ public class SQLJoinTableSourceProcessor implements TableSourceProcessor {
 
     @Override
     public void process(String dbType, AtomicInteger sequence, TreeNode<ParseTableNode> parent, SQLTableSource sqlTableSource) {
-        log.info("开始处理SQLJoinTableSource");
         ParseTableNode proxyTable = ParseTableNode.builder()
                 .isVirtualTemp(true)
                 .expression(SQLUtils.toSQLString(sqlTableSource))
