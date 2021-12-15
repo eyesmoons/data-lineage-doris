@@ -16,7 +16,6 @@ public class SQLAllColumnExprProcessor implements SQLExprProcessor {
     @Override
     public void process(String dbType, SQLExpr expr, SqlExprContent content) {
         SQLAllColumnExpr sqlAllColumnExpr = (SQLAllColumnExpr) expr;
-        log.info("处理字段为[*]表达式:{}", sqlAllColumnExpr);
         content.addItem(SqlExprContent.builder().name("*").build());
     }
 }

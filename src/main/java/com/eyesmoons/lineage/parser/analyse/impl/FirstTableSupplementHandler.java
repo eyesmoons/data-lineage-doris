@@ -43,6 +43,7 @@ public class FirstTableSupplementHandler implements IHandler {
             ParseTableNode parseTableNode = root.getValue();
             String targetTableName = parseTableNode.getName();
             String targetTableDb = parseTableNode.getDbName();
+            log.info("查询元数据：[{}.{}]", targetTableDb, targetTableName);
             List<JSONObject> resultColumns = DorisJdbcUtil.executeQuery(hostUrl, db, user, password, "desc " + targetTableDb + "." + targetTableName);
             List<ParseColumnNode> parseColumnNodeList = resultColumns.stream().map(this::convert2ColumnNode).collect(Collectors.toList());
             List<ParseColumnNode> childColumnList = this.findFirstHaveColumnTableNode(root).getValue().getColumns();

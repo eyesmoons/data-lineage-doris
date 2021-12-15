@@ -17,7 +17,6 @@ public class SQLPropertyExprProcessor implements SQLExprProcessor {
     @Override
     public void process(String dbType, SQLExpr expr, SqlExprContent content) {
         SQLPropertyExpr sqlPropertyExpr = (SQLPropertyExpr) expr;
-        log.info("处理前缀表达式:{}", sqlPropertyExpr);
         content.addItem(SqlExprContent.builder().name(sqlPropertyExpr.getName()).owner(sqlPropertyExpr.getOwnerName()).build());
     }
 }

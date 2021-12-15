@@ -3,26 +3,37 @@ package com.eyesmoons.lineage.parser.tracer;
 import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
+import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
 import com.alibaba.druid.sql.dialect.mysql.parser.MySqlStatementParser;
 import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlSchemaStatVisitor;
 import com.alibaba.druid.sql.parser.SQLStatementParser;
 import com.alibaba.druid.stat.TableStat;
+import com.alibaba.fastjson.JSONObject;
 import com.eyesmoons.lineage.exception.ParserException;
 import com.eyesmoons.lineage.model.parser.ParseColumnNode;
 import com.eyesmoons.lineage.model.parser.ParseTableNode;
 import com.eyesmoons.lineage.model.parser.TreeNode;
+import com.eyesmoons.lineage.utils.DorisJdbcUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiConsumer;
 
 /**
  * 默认字段血缘生成逻辑
  */
 @Slf4j
 public class DefaultColumnLineageTracer implements ColumnLineageTracer {
+
+    private static final String hostUrl = "172.22.224.101:6033";
+
+    private static final String db = "tms";
+
+    private static final String user = "shengyu";
+
+    private static final String password = "j1sYxLGcEDhu";
 
     /**
      * Long tableId 节点ID
@@ -89,6 +100,25 @@ public class DefaultColumnLineageTracer implements ColumnLineageTracer {
             String scanColumnName = Optional.ofNullable(currentColumnNode.getValue().getName()).orElse(currentColumnNode.getValue().getAlias());
             // 获取当前中间节点的字段名
             List<ParseColumnNode> columns = currentRecentlyTableNode.getValue().getColumns();
+            // 处理字段名[*]的情况
+            if (columns.size() == 1 && Objects.equals("*", columns.get(0).getName())) {
+                String tableExpression = columns.get(0).getTableExpression();
+                Set<TableStat.Name> tables = getTablesFromSql(tableExpression);
+                tables.forEach(table -> {
+                    String tableName = table.getName();
+                    String targetDbName = tableName.split("\\.")[0];
+                    String targetTblName = tableName.split("\\.")[1];
+
+                    log.info("查询元数据：[{}]", tableName);
+                    List<JSONObject> resultColumns = DorisJdbcUtil.executeQuery(hostUrl, db, user, password, "desc " + targetDbName + "." + targetTblName);
+                    for (JSONObject column : resultColumns) {
+                        ParseColumnNode node = new ParseColumnNode();
+                        node.setName(column.getString("Field"));
+                        node.setTableName(tableName);
+                        columns.add(node);
+                    }
+                });
+            }
             // 设置节点所有表为当前
             for (ParseColumnNode column : columns) {
                 String name = Optional.ofNullable(column.getAlias()).orElse(column.getName());
@@ -121,39 +151,15 @@ public class DefaultColumnLineageTracer implements ColumnLineageTracer {
                             .owner(nearestTableNodeList.get(0).getValue())
                             .build());
         } else {
-            if (nearestTableNodeList.size() > 0){
-                String originSql = findOriginSql(currentColumnNode.getParent());
-                Collection<TableStat.Column> tableAndField = getTableAndField(originSql);
-                for (TableStat.Column column : tableAndField) {
-                    String tblName = column.getTable().trim().replace("`", "");
-                    String colName = column.getName().trim().replace("`", "");
-                    if (Objects.equals(colName, columnName.trim().replace("`", ""))) {
-                        AtomicReference<ParseTableNode> owner = new AtomicReference<>();
-                        nearestTableNodeList.forEach(item -> item.getChildList().forEach(item2 -> {
-                            String expression = item2.getValue().getExpression();
-                            // druid解析器bug，未解析到的字段表名为UNKNOWN，这里取最近的一个表名作为tableName
-                            if (Objects.equals(tblName, expression.trim().replace("`","")) || Objects.equals("UNKNOWN", tblName)) {
-                                owner.getAndSet(item2.getValue());
-                            }
-                        }));
-
-                        TreeNode<ParseColumnNode> endColumnNode = new TreeNode<>();
-                        currentColumnNode.addChild(endColumnNode);
-                        endColumnNode.setValue(ParseColumnNode.builder()
-                                .name(columnName.trim().replace("`",""))
-                                .tableName(tblName)
-                                .owner(owner.get())
-                                .build());
-                    }
-                }
-            } else {
-                // 兜底：记录找不到的信息
-                String tableName = currentColumnNode.getValue().getTableName();
-                log.warn("columnNodeTree:{} not ended", StringUtils.isBlank(tableName) ? columnName : (tableName + "." + columnName));
-            }
+            // 兜底：记录找不到的信息
+            String tableName = currentColumnNode.getValue().getTableName();
+            log.warn("字段[{}]来源未知", StringUtils.isBlank(tableName) ? columnName : (tableName + "." + columnName));
         }
     }
 
+    /**
+     * 递归找到原始SQL
+     */
     private String findOriginSql(TreeNode<ParseColumnNode> parent) {
         if (Objects.nonNull(parent.getParent())) {
             return findOriginSql(parent.getParent());
@@ -226,12 +232,12 @@ public class DefaultColumnLineageTracer implements ColumnLineageTracer {
         return mysqlSchemaStatVisitor.getTables().keySet().stream().findFirst().orElseThrow(() -> new ParserException("repair missing table failed,column expression[%s].", parseColumnNode.getExpression())).getName();
     }
 
-    private Collection<TableStat.Column> getTableAndField(String sql) {
+    private Set<TableStat.Name> getTablesFromSql(String sql) {
         SQLStatementParser parser = new MySqlStatementParser(sql);
-        SQLStatement sqlStatement = parser.parseInsert();
-        SQLInsertStatement sqlInsertStatement = (SQLInsertStatement) sqlStatement;
+        SQLSelectStatement sqlSelectStatement = (SQLSelectStatement) parser.parseSelect();
         MySqlSchemaStatVisitor visitor = new MySqlSchemaStatVisitor();
-        sqlInsertStatement.accept(visitor);
-        return visitor.getColumns();
+        sqlSelectStatement.accept(visitor);
+        Map<TableStat.Name, TableStat> tables = visitor.getTables();
+        return tables.keySet();
     }
 }

@@ -30,7 +30,6 @@ public class SQLUnionQueryProcessor extends AbstractSQLSelectQueryProcessor {
 
     @Override
     public void process(String dbType, AtomicInteger sequence, TreeNode<ParseTableNode> parent, SQLSelectQuery sqlSelectQuery) {
-        log.info("处理union查询语句");
         ParseTableNode proxyTable = ParseTableNode.builder()
                 .isVirtualTemp(true)
                 .expression(SQLUtils.toSQLString(sqlSelectQuery))

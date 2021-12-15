@@ -27,7 +27,6 @@ public class SQLCaseExprProcessor implements SQLExprProcessor {
     @Override
     public void process(String dbType, SQLExpr expr, SqlExprContent content) {
         SQLCaseExpr sqlCaseExpr = (SQLCaseExpr) expr;
-        log.info("处理CASE表达式:{}", sqlCaseExpr);
         this.getAllCaseExprChild(sqlCaseExpr).forEach(expr1 -> ProcessorRegister.getSQLExprProcessor(expr1.getClass()).process(dbType, expr1, content));
     }
 

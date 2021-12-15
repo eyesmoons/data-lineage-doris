@@ -20,7 +20,6 @@ public class SQLAggregateExprProcessor implements SQLExprProcessor {
     @Override
     public void process(String dbType, SQLExpr expr, SqlExprContent content) {
         SQLAggregateExpr sqlAggregateExpr = (SQLAggregateExpr) expr;
-        log.info("处理聚合函数表达式:{}", sqlAggregateExpr);
         sqlAggregateExpr.getArguments().forEach(sqlExpr -> ProcessorRegister.getSQLExprProcessor(sqlExpr.getClass()).process(dbType, sqlExpr, content));
     }
 }

@@ -12,6 +12,5 @@ public class SQLIntegerExprProcessor implements SQLExprProcessor{
     @Override
     public void process(String dbType, SQLExpr expr, SqlExprContent content) {
         SQLIntegerExpr sqlIntegerExpr = (SQLIntegerExpr) expr;
-        log.info("处理整数表达式:{}", sqlIntegerExpr);
     }
 }

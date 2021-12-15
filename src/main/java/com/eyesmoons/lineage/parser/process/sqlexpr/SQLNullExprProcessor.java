@@ -12,6 +12,5 @@ public class SQLNullExprProcessor implements SQLExprProcessor{
     @Override
     public void process(String dbType, SQLExpr expr, SqlExprContent content) {
         SQLNullExpr sqlNullExpr = (SQLNullExpr) expr;
-        log.info("处理空表达式:{}", sqlNullExpr);
     }
 }

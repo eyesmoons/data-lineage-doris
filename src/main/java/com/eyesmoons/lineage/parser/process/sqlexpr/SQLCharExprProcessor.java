@@ -17,6 +17,5 @@ public class SQLCharExprProcessor implements SQLExprProcessor {
     @Override
     public void process(String dbType, SQLExpr expr, SqlExprContent content) {
         SQLCharExpr sqlCharExpr = (SQLCharExpr) expr;
-        log.info("处理常量表达式:{}", sqlCharExpr);
     }
 }

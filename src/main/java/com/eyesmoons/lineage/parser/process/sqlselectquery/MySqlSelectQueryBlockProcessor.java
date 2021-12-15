@@ -34,7 +34,6 @@ public class MySqlSelectQueryBlockProcessor extends AbstractSQLSelectQueryProces
 
     @Override
     public void process(String dbType, AtomicInteger sequence, TreeNode<ParseTableNode> parent, SQLSelectQuery sqlSelectQuery) {
-        log.info("处理select语句");
         MySqlSelectQueryBlock mysqlSelectQueryBlock = (MySqlSelectQueryBlock) sqlSelectQuery;
         // 建立表节点，并关系父级关系
         ParseTableNode proxyTable = ParseTableNode.builder()
