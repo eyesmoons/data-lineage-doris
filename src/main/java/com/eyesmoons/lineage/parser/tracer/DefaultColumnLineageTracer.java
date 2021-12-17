@@ -23,14 +23,6 @@ import java.util.*;
 @Slf4j
 public class DefaultColumnLineageTracer implements ColumnLineageTracer {
 
-    private static final String hostUrl = "172.22.224.101:6033";
-
-    private static final String db = "tms";
-
-    private static final String user = "shengyu";
-
-    private static final String password = "j1sYxLGcEDhu";
-
     /**
      * Long tableId 节点ID
      * List<TreeNode<TableNode>> 某一节点最近的节点
@@ -97,28 +89,9 @@ public class DefaultColumnLineageTracer implements ColumnLineageTracer {
             // 获取当前中间节点的字段名
             List<ParseColumnNode> columns = currentRecentlyTableNode.getValue().getColumns();
             // 处理字段名为[*]的情况
-            /*if (columns.size() == 1 && Objects.equals("*", columns.get(0).getName())) {
-                String tableExpression = columns.get(0).getTableExpression();
-                Set<TableStat.Name> tables = getTablesFromSql(tableExpression);
-                tables.forEach(table -> {
-                    String tableName = table.getName();
-                    String targetDbName = tableName.split("\\.")[0];
-                    String targetTblName = tableName.split("\\.")[1];
-
-                    log.info("查询元数据：[{}]", tableName);
-                    List<JSONObject> resultColumns = DorisJdbcUtil.executeQuery(hostUrl, db, user, password, "desc " + targetDbName + "." + targetTblName);
-                    for (JSONObject column : resultColumns) {
-                        ParseColumnNode node = new ParseColumnNode();
-                        node.setName(column.getString("Field"));
-                        node.setTableName(tableName);
-                        columns.add(node);
-                    }
-                });
-            }*/
-            // 处理字段名为[*]的情况
-            if (columns.size() == 1 && StringUtils.isBlank(columns.get(0).getName())) {
-                columns.addAll(columns.get(0).getSourceColumns());
-            }
+//            if (columns.size() == 1 && StringUtils.isBlank(columns.get(0).getName())) {
+//                columns.addAll(columns.get(0).getSourceColumns());
+//            }
             for (ParseColumnNode column : columns) {
                 String name = Optional.ofNullable(column.getAlias()).orElse(column.getName());
                 if (scanColumnName.equals(name)) {

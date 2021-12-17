@@ -1,10 +1,15 @@
 package com.eyesmoons.lineage.handler.impl;
 
 
+import com.alibaba.druid.DbType;
+import com.alibaba.druid.sql.SQLUtils;
+import com.alibaba.druid.sql.ast.SQLStatement;
+import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlOutputVisitor;
 import com.eyesmoons.lineage.contants.Constants;
 import com.eyesmoons.lineage.exception.CustomException;
 import com.eyesmoons.lineage.handler.BaseMessageHandler;
 import com.eyesmoons.lineage.model.response.DorisSqlAudit;
+import com.eyesmoons.lineage.parser.visitor.RewriteAllColumnsVisitor;
 import com.eyesmoons.lineage.utils.JSONUtil;
 import com.eyesmoons.lineage.annotation.SourceHandler;
 import com.eyesmoons.lineage.contants.HandlerConstant;
@@ -26,6 +31,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -45,8 +51,9 @@ public class SqlMessageHandler implements BaseMessageHandler {
 
     @Override
     public LineageContext handle(DorisSqlAudit audit) {
+        String sql = rewriteSql(audit);
         SqlMessage sqlMessage = new SqlMessage();
-        sqlMessage.setSql(audit.getStmt());
+        sqlMessage.setSql(sql);
         sqlMessage.setDataSourceName(DATA_SOURCE_NAME);
         sqlMessage.setDbType(Constants.DEFAULT_DB_TYPE);
         LineageContext context = new LineageContext();
@@ -58,6 +65,25 @@ public class SqlMessageHandler implements BaseMessageHandler {
         // 建立上层节点 DataSource、Db
         createUpperLayerNode(context);
         return context;
+    }
+
+    /**
+     * 重写SQL，处理SQL中字段为[*]的情况
+     */
+    private String rewriteSql(DorisSqlAudit audit) {
+        String sql = audit.getStmt();
+        RewriteAllColumnsVisitor rewriteAllColumnsVisitor = new RewriteAllColumnsVisitor();
+        List<SQLStatement> statements = SQLUtils.parseStatements(sql, DbType.mysql);
+        List<String> newSql = new ArrayList<>();
+        for (SQLStatement statement : statements) {
+            statement.accept(rewriteAllColumnsVisitor);
+            StringBuilder sb = new StringBuilder();
+            MySqlOutputVisitor mySqlOutputVisitor = new MySqlOutputVisitor(sb);
+            statement.accept(mySqlOutputVisitor);
+            newSql.add(sb.toString());
+        }
+        log.info("重写后的SQL：{}", newSql);
+        return String.join(";", newSql);
     }
 
     private void createUpperLayerNode(LineageContext context) {

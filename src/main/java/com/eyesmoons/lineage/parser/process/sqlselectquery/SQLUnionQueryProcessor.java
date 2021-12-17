@@ -42,8 +42,7 @@ public class SQLUnionQueryProcessor extends AbstractSQLSelectQueryProcessor {
         // TODO 考虑字段合并到 proxyTable 的字段
         List<SQLSelectQuery> selectQueryList = ((SQLUnionQuery) sqlSelectQuery).getRelations();
         if (CollectionUtils.isNotEmpty(selectQueryList)) {
-            selectQueryList.forEach(item -> ProcessorRegister.getSQLSelectQueryProcessor(item.getClass()).process(dbType, sequence, proxyNode, item)
-            );
+            selectQueryList.forEach(item -> ProcessorRegister.getSQLSelectQueryProcessor(item.getClass()).process(dbType, sequence, proxyNode, item));
         }
     }
 }
