@@ -8,6 +8,7 @@ import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlSelectQueryBlock;
 import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlASTVisitorAdapter;
 import com.alibaba.fastjson.JSONObject;
 import com.eyesmoons.lineage.utils.DorisJdbcUtil;
+import com.eyesmoons.lineage.utils.PropertiesUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -18,9 +19,9 @@ import java.util.Objects;
 @Slf4j
 public class RewriteAllColumnsVisitor extends MySqlASTVisitorAdapter {
 
-    private static final String hostUrl = "172.22.224.101:6033";
-    private static final String user = "shengyu";
-    private static final String password = "j1sYxLGcEDhu";
+    private static final String hostUrl = PropertiesUtil.getPropValue("doris.hostUrl");
+    private static final String user = PropertiesUtil.getPropValue("doris.user");
+    private static final String password = PropertiesUtil.getPropValue("doris.password");
 
     @Override
     public boolean visit(MySqlInsertStatement statement) {

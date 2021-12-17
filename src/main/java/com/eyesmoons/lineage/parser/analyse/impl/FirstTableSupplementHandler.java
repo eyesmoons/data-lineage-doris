@@ -10,6 +10,7 @@ import com.eyesmoons.lineage.contants.PriorityConstants;
 import com.eyesmoons.lineage.model.parser.ParseColumnNode;
 import com.eyesmoons.lineage.model.parser.ParseTableNode;
 import com.eyesmoons.lineage.model.parser.TreeNode;
+import com.eyesmoons.lineage.utils.PropertiesUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.core.annotation.Order;
@@ -28,13 +29,9 @@ import java.util.stream.Collectors;
 @Slf4j
 public class FirstTableSupplementHandler implements IHandler {
 
-    private static final String hostUrl = "172.22.224.101:6033";
-
-    private static final String db = "tms";
-
-    private static final String user = "shengyu";
-
-    private static final String password = "j1sYxLGcEDhu";
+    private static final String hostUrl = PropertiesUtil.getPropValue("doris.hostUrl");
+    private static final String user = PropertiesUtil.getPropValue("doris.user");
+    private static final String password = PropertiesUtil.getPropValue("doris.password");
 
     @Override
     public void handleRequest(SqlRequestContext request, SqlResponseContext response) {
@@ -44,7 +41,7 @@ public class FirstTableSupplementHandler implements IHandler {
             String targetTableName = parseTableNode.getName();
             String targetTableDb = parseTableNode.getDbName();
             log.info("查询元数据：[{}.{}]", targetTableDb, targetTableName);
-            List<JSONObject> resultColumns = DorisJdbcUtil.executeQuery(hostUrl, db, user, password, "desc " + targetTableDb + "." + targetTableName);
+            List<JSONObject> resultColumns = DorisJdbcUtil.executeQuery(hostUrl, targetTableDb, user, password, "desc " + targetTableDb + "." + targetTableName);
             List<ParseColumnNode> parseColumnNodeList = resultColumns.stream().map(this::convert2ColumnNode).collect(Collectors.toList());
             List<ParseColumnNode> childColumnList = this.findFirstHaveColumnTableNode(root).getValue().getColumns();
             if (parseColumnNodeList.size() != childColumnList.size()) {
