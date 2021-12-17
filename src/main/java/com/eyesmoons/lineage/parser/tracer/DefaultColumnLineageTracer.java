@@ -88,10 +88,6 @@ public class DefaultColumnLineageTracer implements ColumnLineageTracer {
             String scanColumnName = Optional.ofNullable(currentColumnNode.getValue().getName()).orElse(currentColumnNode.getValue().getAlias());
             // 获取当前中间节点的字段名
             List<ParseColumnNode> columns = currentRecentlyTableNode.getValue().getColumns();
-            // 处理字段名为[*]的情况
-//            if (columns.size() == 1 && StringUtils.isBlank(columns.get(0).getName())) {
-//                columns.addAll(columns.get(0).getSourceColumns());
-//            }
             for (ParseColumnNode column : columns) {
                 String name = Optional.ofNullable(column.getAlias()).orElse(column.getName());
                 if (scanColumnName.equals(name)) {
