@@ -2,24 +2,20 @@ package com.eyesmoons.lineage.parser.tracer;
 
 import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLStatement;
-import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
 import com.alibaba.druid.sql.dialect.mysql.parser.MySqlStatementParser;
 import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlSchemaStatVisitor;
 import com.alibaba.druid.sql.parser.SQLStatementParser;
 import com.alibaba.druid.stat.TableStat;
-import com.alibaba.fastjson.JSONObject;
 import com.eyesmoons.lineage.exception.ParserException;
 import com.eyesmoons.lineage.model.parser.ParseColumnNode;
 import com.eyesmoons.lineage.model.parser.ParseTableNode;
 import com.eyesmoons.lineage.model.parser.TreeNode;
-import com.eyesmoons.lineage.utils.DorisJdbcUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
-import java.util.function.BiConsumer;
 
 /**
  * 默认字段血缘生成逻辑
@@ -100,8 +96,8 @@ public class DefaultColumnLineageTracer implements ColumnLineageTracer {
             String scanColumnName = Optional.ofNullable(currentColumnNode.getValue().getName()).orElse(currentColumnNode.getValue().getAlias());
             // 获取当前中间节点的字段名
             List<ParseColumnNode> columns = currentRecentlyTableNode.getValue().getColumns();
-            // 处理字段名[*]的情况
-            if (columns.size() == 1 && Objects.equals("*", columns.get(0).getName())) {
+            // 处理字段名为[*]的情况
+            /*if (columns.size() == 1 && Objects.equals("*", columns.get(0).getName())) {
                 String tableExpression = columns.get(0).getTableExpression();
                 Set<TableStat.Name> tables = getTablesFromSql(tableExpression);
                 tables.forEach(table -> {
@@ -118,11 +114,13 @@ public class DefaultColumnLineageTracer implements ColumnLineageTracer {
                         columns.add(node);
                     }
                 });
+            }*/
+            // 处理字段名为[*]的情况
+            if (columns.size() == 1 && StringUtils.isBlank(columns.get(0).getName())) {
+                columns.addAll(columns.get(0).getSourceColumns());
             }
-            // 设置节点所有表为当前
             for (ParseColumnNode column : columns) {
                 String name = Optional.ofNullable(column.getAlias()).orElse(column.getName());
-                // 如果相等 构建关系
                 if (scanColumnName.equals(name)) {
                     TreeNode<ParseColumnNode> midColumnTree = new TreeNode<>();
                     currentColumnNode.addChild(midColumnTree);
@@ -133,7 +131,7 @@ public class DefaultColumnLineageTracer implements ColumnLineageTracer {
                 }
             }
         }
-        // for 循环完之后还是找不到，判断长度是否为1并且为leaf节点
+        // for 循环完之后还是找不到，判断长度是否为1并且为叶子节点
         this.possibleColumnSource(currentColumnNode, nearestTableNodeList);
     }
 
