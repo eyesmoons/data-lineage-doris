@@ -1,18 +1,17 @@
 package com.eyesmoons.lineage.listener;
 
 import com.eyesmoons.lineage.contants.Constants;
-import com.eyesmoons.lineage.exception.CustomException;
-import com.eyesmoons.lineage.model.response.DorisSqlAudit;
-import com.eyesmoons.lineage.utils.JSONUtil;
 import com.eyesmoons.lineage.contants.NeoConstant;
+import com.eyesmoons.lineage.exception.CustomException;
 import com.eyesmoons.lineage.handler.BaseMessageHandler;
 import com.eyesmoons.lineage.handler.BaseStorageHandler;
+import com.eyesmoons.lineage.model.response.DorisSqlAudit;
 import com.eyesmoons.lineage.model.response.LineageContext;
+import com.eyesmoons.lineage.utils.JSONUtil;
 import com.eyesmoons.lineage.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
 
@@ -32,7 +31,7 @@ public class FeLogListener {
     @Autowired
     private BaseStorageHandler mergeStorageHandler;
 
-    //@KafkaListener(topics = "lineage", containerFactory = "ackContainerFactory")
+    //@KafkaListener(topics = "lineage", containerFactory = "customerContainerFactory")
     public void handleMessage(ConsumerRecord<String, String> record, Acknowledgment acknowledgment) {
         try {
             // 判断是否为空，并且数字开头
