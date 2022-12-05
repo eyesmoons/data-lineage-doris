@@ -29,7 +29,7 @@ public class CustomFeLogListener {
     @Autowired
     private BaseStorageHandler mergeStorageHandler;
 
-    @KafkaListener(topics = "lineage", containerFactory = "ackContainerFactory")
+    @KafkaListener(topics = "lineage", containerFactory = "customerContainerFactory")
     public void handleMessage(ConsumerRecord<String, String> record, Acknowledgment acknowledgment) {
         try {
             // 判断是否为空，并且数字开头
